@@ -1,4 +1,5 @@
 .env
-data/
+data/*
+!data/.gitkeep
 venv
 __pycache__/
