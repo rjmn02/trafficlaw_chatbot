@@ -1,4 +1,8 @@
 .env
+<<<<<<< HEAD
 data/*
+=======
+data/
+>>>>>>> 0e2ae7badc26e5e426ed53f77ba158dd654f5e99
 venv
 __pycache__/
