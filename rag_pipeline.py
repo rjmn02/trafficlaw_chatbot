@@ -4,6 +4,7 @@ from embedding_model import get_embedding_model
 from vector_store import get_vector_store
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
+from langgraph.checkpoint.memory import MemorySaver
 import os
 import sys
 
@@ -20,8 +21,7 @@ vector_store = get_vector_store(
 @tool(response_format="content_and_artifact")
 def retrieve_context(query: str):
   """
-  Retrieve the top 3 relevant traffic law documents for the given query.
-  Returns a serialized string for display and the raw document objects for citation.
+  Retrieve information related to a query.
   """
   retrieved_docs = vector_store.similarity_search(query, k=3)
   serialized = "\n\n".join(
@@ -31,17 +31,23 @@ def retrieve_context(query: str):
   return serialized, retrieved_docs
 
 def main(query: str):
-    tools = [retrieve_context]
-    prompt = (
-        "You can call a tool that returns relevant passages from a collection of traffic law documents. "
-        "Always call the tool first to fetch supporting evidence before giving response "
-        "If no evidence, say you lack sufficient context."
-    )
-    agent = create_react_agent(model=llm, tools=tools, prompt=prompt)
-    
-    for event in agent.stream(
-      input = {"messages": [{"role": "user", "content": query}]},
-      stream_mode="updates",
-    ):
-      print(event)
-        
+  tools = [retrieve_context]
+  memory = MemorySaver()
+  agent = create_react_agent(model=llm, tools=tools, checkpointer=memory)
+  
+  # You can set the THREAD_ID environment variable to control the thread ID
+  config = {"configurable": {"thread_id": "abc123"}} 
+
+  for event in agent.stream(
+    {"messages": [{"role": "user", "content": query}]},
+    stream_mode="values",
+    config=config,
+  ):
+    event["messages"][-1].pretty_print()
+
+if __name__ == "__main__":
+  if len(sys.argv) != 2:
+    print("Usage: python rag_pipeline.py '<your question here>'")
+  user_query = sys.argv[1]
+  main(user_query)
+      
