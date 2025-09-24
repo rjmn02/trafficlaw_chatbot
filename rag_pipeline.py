@@ -12,11 +12,11 @@ load_dotenv()
 
 # Configuration constants
 MODEL_NAME = "llama-3.1-8b-instant"
-# MODEL_NAME = "llama-3.3-70b-versatile"
 MODEL_PROVIDER = "groq"
 COLLECTION_NAME = "trafficlaw_docs"
 RETRIEVAL_K = 3
 DEFAULT_THREAD_ID = "abc123"
+
 
 
 # load pipeline components
