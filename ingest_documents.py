@@ -1,38 +1,39 @@
-from langchain_community.document_loaders import PyMuPDFLoader
-from embedding_model import get_embedding_model
-from vector_store import get_vector_store
-from langchain.schema import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from transformers import AutoTokenizer
 from typing import List
+from schemas.document import DocumentBase
+import pymupdf
 import os
+from transformers import AutoTokenizer
+
 
 FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/raw/"
+CHUNK_SIZE = 256
+OVERLAP = 50
 
-# load documents
-def load_documents(path: str) -> List[Document]:
-  documents = []
-  pdf_count = 0
+def load_documents():
+  documents: List[DocumentBase] = []
   
-  for filename in os.listdir(path):
-    if filename.lower().endswith(".pdf"):
-      pdf_count += 1
-      try:
-        loader = PyMuPDFLoader(os.path.join(path, filename))
-        documents.extend(loader.load())
-      except Exception as e:
-        print(f"Error loading {filename}: {e}")
+  for doc_path in os.listdir(FILE_PATH):
+    if doc_path.lower().endswith(".pdf"):
+      doc = pymupdf.open(os.path.join(FILE_PATH, doc_path)) # open a document
+      content: str = ""
+      metadata = doc.metadata
       
-  print(len(documents), "documents loaded.")
-  print(f"{pdf_count} PDFs processed.")
-  
-  return documents
+      for page in doc: # iterate the document pages
+        content += page.get_text()
+        
+      documents.append({"content": content, "metadata": metadata})
+      doc.close()
 
-# chunking and tokenizing
-def text_chunking(
-  documents: List[Document], 
-) -> List[Document]:
+  print(len(documents[0]))
+  return documents
+  pass
+
+def clean_texts(documents: List[DocumentBase]):
   
+  pass
+
+def chunk_documents(documents: DocumentBase, chunk_size=500, overlap=50):
   tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
   
   text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
@@ -44,32 +45,7 @@ def text_chunking(
   text_chunks = text_splitter.split_documents(documents=documents)
   return text_chunks
 
-# embed and store
-def store_in_db(
-  text_chunks: List[Document],
-):
-  
-  embedding_model = get_embedding_model()
-  
-  vector_store = get_vector_store(
-    embeddings=embedding_model,
-    collection_name="trafficlaw_docs",
-  )
-  
-  vector_store.add_documents(documents=text_chunks)
-  
-def main():
-  documents = load_documents(FILE_PATH)
-  
-  if not documents:
-    print("No documents found.")
-    return
-  
-  text_chunks = text_chunking(documents=documents)
-  store_in_db(text_chunks=text_chunks)
-  
-  print("Data preproucessing and storage complete.")
+def store_documents(chunks):
+  pass
 
-
-if __name__ == "__main__":
-  main()
+load_documents()
