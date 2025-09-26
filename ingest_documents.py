@@ -1,10 +1,14 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from typing import List
+
+from sentence_transformers import SentenceTransformer
 from schemas.document import DocumentBase
 import pymupdf
 import os
 import re
 from transformers import AutoTokenizer
+
+from utils.database import get_db
 
 
 FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/raw/"
@@ -12,6 +16,7 @@ TOKINIZER_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 CHUNK_SIZE = 256
 OVERLAP = 50
 
+# loading documents from the file path
 def load_documents() -> List[DocumentBase]:
   documents: List[DocumentBase] = []
   
@@ -31,6 +36,7 @@ def load_documents() -> List[DocumentBase]:
   return documents
   pass
 
+# cleaning document contents
 def clean_document_contents(documents: List[DocumentBase]) -> List[DocumentBase]:
   cleaned_docs: List[DocumentBase] = []
   for doc in documents:
@@ -39,6 +45,7 @@ def clean_document_contents(documents: List[DocumentBase]) -> List[DocumentBase]
 
   return cleaned_docs
 
+# chunking and tokenizing
 def chunk_documents(documents: List[DocumentBase], chunk_size=CHUNK_SIZE, overlap=OVERLAP):
   tokenizer = AutoTokenizer.from_pretrained(TOKINIZER_MODEL)
   text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
@@ -55,9 +62,8 @@ def chunk_documents(documents: List[DocumentBase], chunk_size=CHUNK_SIZE, overla
 
   return chunked_docs
   
-
+# embed and store documents
 def store_documents(documents: List[DocumentBase]) -> None:
-  
-  pass
+    model = SentenceTransformer(TOKINIZER_MODEL)
 
 load_documents()
