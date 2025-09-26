@@ -3,14 +3,16 @@ from typing import List
 from schemas.document import DocumentBase
 import pymupdf
 import os
+import re
 from transformers import AutoTokenizer
 
 
 FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/raw/"
+TOKINIZER_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 CHUNK_SIZE = 256
 OVERLAP = 50
 
-def load_documents():
+def load_documents() -> List[DocumentBase]:
   documents: List[DocumentBase] = []
   
   for doc_path in os.listdir(FILE_PATH):
@@ -22,30 +24,40 @@ def load_documents():
       for page in doc: # iterate the document pages
         content += page.get_text()
         
-      documents.append({"content": content, "metadata": metadata})
+      documents.append(DocumentBase(content=content, metadata=metadata, embedding=[]))  # Placeholder embedding
       doc.close()
 
   print(len(documents[0]))
   return documents
   pass
 
-def clean_texts(documents: List[DocumentBase]):
-  
-  pass
+def clean_document_contents(documents: List[DocumentBase]) -> List[DocumentBase]:
+  cleaned_docs: List[DocumentBase] = []
+  for doc in documents:
+    cleaned_content = re.sub(r'\s+', ' ', doc.content).strip()
+    cleaned_docs.append(DocumentBase(content=cleaned_content, metadata=doc.metadata, embedding=[]))  # Placeholder embedding
 
-def chunk_documents(documents: DocumentBase, chunk_size=500, overlap=50):
-  tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
-  
+  return cleaned_docs
+
+def chunk_documents(documents: List[DocumentBase], chunk_size=CHUNK_SIZE, overlap=OVERLAP):
+  tokenizer = AutoTokenizer.from_pretrained(TOKINIZER_MODEL)
   text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
     tokenizer=tokenizer,
-    chunk_size=256,
-    chunk_overlap=50
+    chunk_size=chunk_size,
+    chunk_overlap=overlap
   )
-  
-  text_chunks = text_splitter.split_documents(documents=documents)
-  return text_chunks
 
-def store_documents(chunks):
+  chunked_docs: List[DocumentBase] = []
+  for doc in documents:
+    chunks = text_splitter.split_text(doc.content)
+    for chunk in chunks:
+      chunked_docs.append(DocumentBase(content=chunk, metadata=doc.metadata, embedding=[]))  # Placeholder embedding
+
+  return chunked_docs
+  
+
+def store_documents(documents: List[DocumentBase]) -> None:
+  
   pass
 
 load_documents()
