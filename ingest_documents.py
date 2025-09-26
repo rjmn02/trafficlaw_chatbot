@@ -12,7 +12,7 @@ from utils.database import get_db
 
 
 FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/raw/"
-TOKINIZER_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 CHUNK_SIZE = 256
 OVERLAP = 50
 
@@ -47,7 +47,7 @@ def clean_document_contents(documents: List[DocumentBase]) -> List[DocumentBase]
 
 # chunking and tokenizing
 def chunk_documents(documents: List[DocumentBase], chunk_size=CHUNK_SIZE, overlap=OVERLAP):
-  tokenizer = AutoTokenizer.from_pretrained(TOKINIZER_MODEL)
+  tokenizer = AutoTokenizer.from_pretrained(EMBEDDING_MODEL)
   text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
     tokenizer=tokenizer,
     chunk_size=chunk_size,
@@ -64,6 +64,6 @@ def chunk_documents(documents: List[DocumentBase], chunk_size=CHUNK_SIZE, overla
   
 # embed and store documents
 def store_documents(documents: List[DocumentBase]) -> None:
-    model = SentenceTransformer(TOKINIZER_MODEL)
+    model = SentenceTransformer(EMBEDDING_MODEL)
 
 load_documents()
