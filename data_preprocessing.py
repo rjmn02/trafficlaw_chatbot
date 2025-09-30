@@ -8,9 +8,6 @@ import os
 import re
 from transformers import AutoTokenizer
 
-from utils.database import get_db
-
-
 FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/raw/"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 CHUNK_SIZE = 256
@@ -34,7 +31,6 @@ def load_documents() -> List[DocumentBase]:
 
   print(len(documents[0]))
   return documents
-  pass
 
 # cleaning document contents
 def clean_document_contents(documents: List[DocumentBase]) -> List[DocumentBase]:
@@ -46,12 +42,12 @@ def clean_document_contents(documents: List[DocumentBase]) -> List[DocumentBase]
   return cleaned_docs
 
 # chunking and tokenizing
-def chunk_documents(documents: List[DocumentBase], chunk_size=CHUNK_SIZE, overlap=OVERLAP):
+def chunk_documents(documents: List[DocumentBase]):
   tokenizer = AutoTokenizer.from_pretrained(EMBEDDING_MODEL)
   text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
     tokenizer=tokenizer,
-    chunk_size=chunk_size,
-    chunk_overlap=overlap
+    chunk_size=CHUNK_SIZE,
+    chunk_overlap=OVERLAP
   )
 
   chunked_docs: List[DocumentBase] = []
@@ -63,7 +59,10 @@ def chunk_documents(documents: List[DocumentBase], chunk_size=CHUNK_SIZE, overla
   return chunked_docs
   
 # embed and store documents
-def store_documents(documents: List[DocumentBase]) -> None:
-    model = SentenceTransformer(EMBEDDING_MODEL)
+async def embed_documents(documents: List[DocumentBase]) -> List[DocumentBase]:
+  model = SentenceTransformer(EMBEDDING_MODEL)
+  for doc in documents:
+    embedding = model.encode(doc.content).tolist()
+    doc.embedding = embedding
 
-load_documents()
+  return documents

@@ -1,13 +1,11 @@
-from collections import defaultdict
-from typing import List
+from typing import List, Dict
 
 class ConversationMemory:
-    def __init__(self):
-        # {user_id: [msg1, msg2, ...]}
-        self.memory = defaultdict(list)
+  def __init__(self):
+    self.history: List[Dict[str, str, str]] = []
 
-    def add_message(self, user_id: str, role: str, content: str):
-        self.memory[user_id].append(f"{role}: {content}")
+  def add_message(self, role: str, content: str, context: str = None):
+    self.history.append({"role": role, "content": content, "context": context})
 
-    def get_history(self, user_id: str) -> List[str]:
-        return self.memory[user_id][-10:]  # keep last 10 messages
+  def get_history(self):
+    return self.history
