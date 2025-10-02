@@ -5,7 +5,7 @@ from datetime import datetime
 class DocumentBase(BaseModel):
   content: str
   embedding: list[float]
-  metadata: dict
+  meta: dict
 
 class DocumentInDB(DocumentBase):
   id: int

@@ -11,7 +11,7 @@ class Document(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     embedding: Mapped[list[float]] = mapped_column(Vector(384), nullable=False) # all-MiniLM embeds 384-dims
-    metadata: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    meta: Mapped[dict] = mapped_column("metadata", JSONB, nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
   
