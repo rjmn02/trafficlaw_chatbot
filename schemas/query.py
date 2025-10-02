@@ -7,5 +7,4 @@ class QueryRequest(BaseModel):
 
 class QueryResponse(BaseModel):
     answer: str
-    retrieved_docs: List[DocumentInDB]
-    memory: List[str]  # conversation history
+    retrieved_docs: List[str]

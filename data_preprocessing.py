@@ -25,19 +25,23 @@ def load_documents() -> List[DocumentBase]:
       
       for page in doc: # iterate the document pages
         content += page.get_text()
-        
-      documents.append(DocumentBase(content=content, metadata=metadata, embedding=[]))  # Placeholder embedding
-      doc.close()
 
-  print(len(documents[0]))
+      documents.append(DocumentBase(content=content, meta=metadata, embedding=[]))  # Placeholder embedding
+      doc.close()
   return documents
 
 # cleaning document contents
 def clean_document_contents(documents: List[DocumentBase]) -> List[DocumentBase]:
   cleaned_docs: List[DocumentBase] = []
   for doc in documents:
-    cleaned_content = re.sub(r'\s+', ' ', doc.content).strip()
-    cleaned_docs.append(DocumentBase(content=cleaned_content, metadata=doc.metadata, embedding=[]))  # Placeholder embedding
+    # Remove extra whitespaces and newlines
+    text = re.sub(r'\s+', ' ', text)
+    # Remove non-printable characters (keep basic punctuation)
+    text = re.sub(r'[^\x20-\x7E\n]', '', text)
+    # Strip leading/trailing whitespace
+    text = text.strip()
+    
+    cleaned_docs.append(DocumentBase(content=text, meta=doc.meta, embedding=[]))  # Placeholder embedding
 
   return cleaned_docs
 
@@ -62,7 +66,6 @@ def chunk_documents(documents: List[DocumentBase]):
 async def embed_documents(documents: List[DocumentBase]) -> List[DocumentBase]:
   model = SentenceTransformer(EMBEDDING_MODEL)
   for doc in documents:
-    embedding = model.encode(doc.content).tolist()
-    doc.embedding = embedding
-
+    doc.embedding = model.encode(doc.content).tolist()
+  print("Embeddings generated.")
   return documents
