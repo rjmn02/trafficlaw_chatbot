@@ -1,8 +1,7 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from typing import List
-
+from models.document import Document
 from sentence_transformers import SentenceTransformer
-from schemas.document import DocumentBase
 import pymupdf
 import os
 import re
@@ -14,39 +13,35 @@ CHUNK_SIZE = 256
 OVERLAP = 50
 
 # loading documents from the file path
-def load_documents() -> List[DocumentBase]:
-  documents: List[DocumentBase] = []
-  
-  for doc_path in os.listdir(FILE_PATH):
-    if doc_path.lower().endswith(".pdf"):
-      doc = pymupdf.open(os.path.join(FILE_PATH, doc_path)) # open a document
-      content: str = ""
-      metadata = doc.metadata
-      
-      for page in doc: # iterate the document pages
-        content += page.get_text()
-
-      documents.append(DocumentBase(content=content, meta=metadata, embedding=[]))  # Placeholder embedding
-      doc.close()
-  return documents
+def load_documents() -> List[Document]:
+    docs: List[Document] = []
+    count = 0
+    for name in os.listdir(FILE_PATH):
+      if not name.lower().endswith(".pdf"):
+        count += 1
+        path = os.path.join(FILE_PATH, name)
+        pdf = pymupdf.open(path)
+        content = "".join(page.get_text() for page in pdf)
+        meta = pdf.metadata or {}
+        pdf.close()
+        docs.append(Document(content=content, embedding=[], meta=meta))
+    print(f"Loaded {count} documents.")
+    return docs
 
 # cleaning document contents
-def clean_document_contents(documents: List[DocumentBase]) -> List[DocumentBase]:
-  cleaned_docs: List[DocumentBase] = []
-  for doc in documents:
-    # Remove extra whitespaces and newlines
-    text = re.sub(r'\s+', ' ', text)
-    # Remove non-printable characters (keep basic punctuation)
-    text = re.sub(r'[^\x20-\x7E\n]', '', text)
-    # Strip leading/trailing whitespace
-    text = text.strip()
-    
-    cleaned_docs.append(DocumentBase(content=text, meta=doc.meta, embedding=[]))  # Placeholder embedding
+def clean_document_contents(documents: List[Document]) -> List[Document]:
+    cleaned: List[Document] = []
+    for d in documents:
+      text = d.content
+      text = re.sub(r'\s+', ' ', text)
+      text = re.sub(r'[^\x20-\x7E\n]', '', text)
+      text = text.strip()
+      cleaned.append(Document(content=text, embedding=[], meta=d.meta))
+    return cleaned
 
-  return cleaned_docs
 
 # chunking and tokenizing
-def chunk_documents(documents: List[DocumentBase]):
+def chunk_documents(documents: List[Document]):
   tokenizer = AutoTokenizer.from_pretrained(EMBEDDING_MODEL)
   text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
     tokenizer=tokenizer,
@@ -54,16 +49,16 @@ def chunk_documents(documents: List[DocumentBase]):
     chunk_overlap=OVERLAP
   )
 
-  chunked_docs: List[DocumentBase] = []
+  chunked_docs: List[Document] = []
   for doc in documents:
     chunks = text_splitter.split_text(doc.content)
     for chunk in chunks:
-      chunked_docs.append(DocumentBase(content=chunk, metadata=doc.metadata, embedding=[]))  # Placeholder embedding
+      chunked_docs.append(Document(content=chunk, meta=doc.meta, embedding=[]))  # Placeholder embedding
 
   return chunked_docs
   
 # embed and store documents
-async def embed_documents(documents: List[DocumentBase]) -> List[DocumentBase]:
+async def embed_documents(documents: List[Document]) -> List[Document]:
   model = SentenceTransformer(EMBEDDING_MODEL)
   for doc in documents:
     doc.embedding = model.encode(doc.content).tolist()

@@ -3,13 +3,15 @@ from contextlib import asynccontextmanager
 from sqlalchemy import select, func
 from schemas.document import DocumentBase
 from schemas.query import QueryRequest, QueryResponse
-from utils.database import engine, AsyncSessionDep
+from utils.database import engine, async_session, AsyncSessionDep
+from sqlalchemy.ext.asyncio import AsyncSession
 from models.base import Base  # ADDED IMPORT
 from models.document import Document  # NEW: correct source of Document
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
 from data_preprocessing import clean_document_contents, embed_documents, load_documents, chunk_documents, embed_documents
-from rag_pipeline import generate_response, memory
+from rag_pipeline import generate_response
+from memory import ConversationMemory
 
 # The first part of the function, before the yield, will be executed before the application starts.
 # And the part after the yield will be executed after the application has finished.
@@ -17,8 +19,9 @@ from rag_pipeline import generate_response, memory
 async def lifespan(app: FastAPI):
   async with engine.begin() as conn:
     await conn.run_sync(Base.metadata.create_all)
-    
-  await ingest_documents(db = AsyncSessionDep)
+  
+  async with async_session() as session:
+    await ingest_documents(session)
   yield
   await engine.dispose()
 
@@ -38,26 +41,30 @@ app.add_middleware(
     expose_headers=["set-cookie"]
 )
 
-async def ingest_documents(db: AsyncSessionDep):
-  count_documents = select(func.count()).select_from(Document)
+async def ingest_documents(session: AsyncSession):
   try:
-    result = await db.execute(count_documents)
-    if result.scalar() > 0:
-      print("Documents already ingested. Skipping ingestion.")
+    existing = (
+      await session.execute(
+        select(func.count()).select_from(Document))).scalar() or 0
+    if existing > 0:
+      print("Documents already ingested. Skipping.")
       return
-    documents: List[DocumentBase] = load_documents()
-    cleaned_docs = clean_document_contents(documents)
-    chunked_docs = chunk_documents(cleaned_docs)
-    embedded_documents = await embed_documents(chunked_docs)
-    db.add_all(embedded_documents)
-    await db.commit()
+
+    docs = load_documents()
+    docs = clean_document_contents(docs)
+    docs = chunk_documents(docs)
+    docs = await embed_documents(docs)
+
+    session.add_all(docs)
+    await session.commit()
+    print(f"Ingested {len(docs)} chunks.")
   except Exception as e:
-    await db.rollback()
-    print(f"Error storing documents: {e}")
+    await session.rollback()
+    print(f"Ingestion error: {e}")
   
   
 # @app.post("/chat")
 # async def chat_endpoint(query_request: QueryRequest, db: AsyncSessionDep = AsyncSessionDep):
-#   # memory = request.app.state.memory
+#   memory = ConversationMemory()
 #   response: QueryResponse = await generate_response(query_request, db, memory)
 #   return response

@@ -16,7 +16,6 @@ LLM_MODEL = "llama-3.1-8b-instant"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 DEFAULT_TOP_K = 3
 
-memory = ConversationMemory()
 
 async def similarity_search(query: str, db: AsyncSessionDep, top_k: Optional[int] = DEFAULT_TOP_K) -> List[DocumentInDB]:
   model = SentenceTransformer(EMBEDDING_MODEL)
@@ -78,12 +77,12 @@ async def generate_response(query_request: QueryRequest, db: AsyncSessionDep, me
 
     client = Groq(api_key=GROQ_API_KEY)
     completion = client.chat.completions.create(
-        model=LLM_MODEL,
-        messages=[{"role": "user", "content": augmented_prompt}],
-        max_completion_tokens=8192,
-        temperature=1,
-        top_p=1,
-        stream=False,
+      model=LLM_MODEL,
+      messages=[{"role": "user", "content": augmented_prompt}],
+      max_completion_tokens=8192,
+      temperature=1,
+      top_p=1,
+      stream=False,
     )
     llm_answer = completion.choices[0].message["content"]
 
