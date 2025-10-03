@@ -1,19 +1,20 @@
+import os
 import pandas as pd
-import psycopg2
+from sqlalchemy import create_engine
+from dotenv import load_dotenv
 
+load_dotenv()
 
-def db_to_csv():
-  db_con = psycopg2.connect(
-    database="trafficlawdb", 
-    user="root", 
-    password="rootpass",
-    host="localhost",
-    port = "5432",
-  )
+def db_to_csv(outfile: str = "db_values.csv"):
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        raise RuntimeError("DATABASE_URL env var not set")
+    # Convert async URL (postgresql+asyncpg://) to sync (postgresql://)
+    sync_url = db_url.replace("+asyncpg", "")
+    engine = create_engine(sync_url)
+    df = pd.read_sql("SELECT * FROM document", engine)
+    df.to_csv(outfile, index=False)
+    print(f"Wrote {len(df)} rows to {outfile}")
 
-  df = pd.read_sql_query("SELECT * FROM langchain_pg_embedding", db_con)
-  df.to_csv("db_values.csv", index=False)
-  db_con.close()
-  
 if __name__ == "__main__":
-  db_to_csv()
+    db_to_csv()
