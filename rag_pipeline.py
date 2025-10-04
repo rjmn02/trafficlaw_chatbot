@@ -29,12 +29,10 @@ def prompt_augmentation(query: str, context: str) -> str:
   Follow these rules strictly when answering:
 
   - Use only the provided context to generate responses. If the answer is not in the context, say: “I don't know the answer based on Philippine traffic laws.”
-  - Keep answers concise (1-5 sentences).
   - Always stay within the scope: Philippine traffic and vehicle regulations only. Do not provide unrelated legal or personal advice.
   - Be clear, neutral, and user-friendly in tone.
-  - Always end responses with: “Thanks for asking!”
-  - If necessary, remind users: “This chatbot is for informational purposes only and not a substitute for professional legal advice.”
-
+  - At the start of each conversation, remind the users: “This chatbot is for informational purposes only and not a substitute for professional legal advice.”
+  - 
   Context:
   {context}
 
@@ -46,10 +44,10 @@ def prompt_augmentation(query: str, context: str) -> str:
   return ChatPromptTemplate.from_template(template)
 
 def build_rag(query: str):
-  retrieved_docs = vector_store.similarity_search(query=query, k=RETRIEVAL_K)
-  docs_content = "\n\n".join(doc.page_content for doc in retrieved_docs)
-  prompt = prompt.invoke({"question": query, "context": docs_content})
-  answer = llm.invoke(prompt)
+  retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": RETRIEVAL_K})
+  retrieved_docs = retriever.get_relevant_documents(query)
+  prompt = prompt_augmentation(query=query)
   
+  qa_chain = prompt | llm | StrOutputParser()
   return answer, retrieved_docs
   
