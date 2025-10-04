@@ -3,8 +3,8 @@ from typing import List
 from schemas.document import DocumentInDB
 
 class QueryRequest(BaseModel):
-    query: str
+  query: str
 
 class QueryResponse(BaseModel):
-    answer: str
-    retrieved_docs: List[str]
+  answer: str
+  retrieved_docs: List[str]
