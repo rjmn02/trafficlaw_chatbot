@@ -28,17 +28,17 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:8000",
+  "http://localhost:5173",
+  "http://127.0.0.1:8000",
 ]
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["set-cookie"]
+  CORSMiddleware,
+  allow_origins=origins,
+  allow_credentials=True,
+  allow_methods=["*"],
+  allow_headers=["*"],
+  expose_headers=["set-cookie"]
 )
 
 async def ingest_documents(session: AsyncSession):
@@ -63,8 +63,14 @@ async def ingest_documents(session: AsyncSession):
     print(f"Ingestion error: {e}")
   
   
-# @app.post("/chat")
-# async def chat_endpoint(query_request: QueryRequest, db: AsyncSessionDep = AsyncSessionDep):
-#   memory = ConversationMemory()
-#   response: QueryResponse = await generate_response(query_request, db, memory)
-#   return response
+@app.post("/chat")
+async def chat_endpoint(query_request: QueryRequest, db: AsyncSessionDep = AsyncSessionDep):
+  memory = ConversationMemory()
+  response: QueryResponse = await generate_response(query_request, db, memory)
+  return response
+
+
+@app.get("/session/new")
+async def new_session_endpoint():
+  memory = ConversationMemory()
+  return {"message": "New session created."}
