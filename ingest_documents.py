@@ -15,8 +15,10 @@ FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/raw/"
 def clean_text(text: str) -> str:
   # Remove extra whitespaces and newlines
   text = re.sub(r'\s+', ' ', text)
+  
   # Remove non-printable characters (keep basic punctuation)
   text = re.sub(r'[^\x20-\x7E\n]', '', text)
+  
   # Strip leading/trailing whitespace
   text = text.strip()
   return text
@@ -35,9 +37,7 @@ def load_documents(path: str) -> List[Document]:
         # clean text in each document
         for doc in documents_raw:
           doc.page_content = clean_text(doc.page_content)
-          
         documents.extend(documents_raw)
-        
       except Exception as e:
         print(f"Error loading {filename}: {e}")
       
@@ -59,3 +59,28 @@ def text_chunking(
 
   text_chunks = text_splitter.split_documents(documents=documents)
   return text_chunks
+
+def store_in_db(
+  text_chunks: List[Document],
+) -> None:
+  embedding_model = get_embedding_model()
+  vector_store = get_vector_store(
+    embeddings=embedding_model,
+    collection_name="trafficlaw_docs",
+  )
+
+  vector_store.add_documents(documents=text_chunks)
+
+
+  
+
+
+def main():
+  documents = load_documents(FILE_PATH)
+  if not documents:
+    print("No documents found.")
+    return
+
+  text_chunks = text_chunking(documents=documents)
+  store_in_db(text_chunks=text_chunks)
+  print("Data preprocessing and storage complete.")
