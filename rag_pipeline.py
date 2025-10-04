@@ -3,6 +3,7 @@ from langchain.chat_models import init_chat_model
 from embedding_model import get_embedding_model
 from vector_store import get_vector_store
 from langchain.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
 load_dotenv()
 
@@ -12,7 +13,6 @@ MODEL_NAME = "llama-3.1-8b-instant"
 MODEL_PROVIDER = "groq"
 COLLECTION_NAME = "trafficlaw_docs"
 RETRIEVAL_K = 3
-DEFAULT_THREAD_ID = "abc123"
 
 
 # load pipeline components
@@ -44,10 +44,3 @@ def prompt_augmentation(query: str, context: str) -> str:
   return ChatPromptTemplate.from_template(template)
 
 def build_rag(query: str):
-  retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": RETRIEVAL_K})
-  retrieved_docs = retriever.get_relevant_documents(query)
-  prompt = prompt_augmentation(query=query)
-  
-  qa_chain = prompt | llm | StrOutputParser()
-  return answer, retrieved_docs
-  
