@@ -2,7 +2,7 @@ from typing import List, Optional, TypedDict
 from collections import deque
 
 class Message(TypedDict):
-    role: str
+    role: str 
     context: Optional[List[str]]
     content: str
 

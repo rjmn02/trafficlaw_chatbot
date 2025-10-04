@@ -63,10 +63,9 @@ async def ingest_documents(session: AsyncSession):
     print(f"Ingestion error: {e}")
   
   
-@app.post("/chat")
-async def chat_endpoint(query_request: QueryRequest, db: AsyncSessionDep = AsyncSessionDep):
-  memory = ConversationMemory()
-  response: QueryResponse = await generate_response(query_request, db, memory)
+@app.post("/chat", response_model=QueryResponse)
+async def chat_endpoint(query_request: QueryRequest, db: AsyncSessionDep = AsyncSessionDep()):
+  response: QueryResponse = await generate_response(query_request, db)
   return response
 
 
