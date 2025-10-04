@@ -71,10 +71,6 @@ def store_in_db(
 
   vector_store.add_documents(documents=text_chunks)
 
-
-  
-
-
 def main():
   documents = load_documents(FILE_PATH)
   if not documents:
@@ -84,3 +80,6 @@ def main():
   text_chunks = text_chunking(documents=documents)
   store_in_db(text_chunks=text_chunks)
   print("Data preprocessing and storage complete.")
+  
+if __name__ == "__main__":
+  main()
