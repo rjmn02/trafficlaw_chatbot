@@ -22,9 +22,8 @@ def load_documents() -> List[Document]:
         path = os.path.join(FILE_PATH, name)
         pdf = pymupdf.open(path)
         content = "".join(page.get_text() for page in pdf)
-        meta = pdf.metadata or {}
         pdf.close()
-        docs.append(Document(content=content, embedding=[], meta=meta))
+        docs.append(Document(content=content, embedding=[], file_source=name))
     print(f"Loaded {count} documents.")
     return docs
 
@@ -36,7 +35,7 @@ def clean_document_contents(documents: List[Document]) -> List[Document]:
       text = re.sub(r'\s+', ' ', text)
       text = re.sub(r'[^\x20-\x7E\n]', '', text)
       text = text.strip()
-      cleaned.append(Document(content=text, embedding=[], meta=d.meta))
+      cleaned.append(Document(content=text, embedding=[], file_source=d.file_source))
     return cleaned
 
 
@@ -53,7 +52,7 @@ def chunk_documents(documents: List[Document]):
   for doc in documents:
     chunks = text_splitter.split_text(doc.content)
     for chunk in chunks:
-      chunked_docs.append(Document(content=chunk, meta=doc.meta, embedding=[]))  # Placeholder embedding
+      chunked_docs.append(Document(content=chunk, file_source=doc.file_source, embedding=[]))  # Placeholder embedding
 
   return chunked_docs
   
