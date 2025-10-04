@@ -1,7 +1,6 @@
 import os
 from groq import Groq
 from sqlalchemy import select
-from memory import ConversationMemory, Message
 from utils.database import AsyncSessionDep
 from models.document import Document
 from schemas.document import DocumentInDB
@@ -60,19 +59,19 @@ def build_prompt(query: str, contexts: List[str]) -> str:
 
 
 async def generate_response(query_request: QueryRequest, db: AsyncSessionDep) -> QueryResponse:
-    query = query_request.query
-    retrieved_docs = await similarity_search(query, db)
-    contexts = [doc.content for doc in retrieved_docs]
-    augmented_prompt = build_prompt(query, contexts)
+  query = query_request.query
+  retrieved_docs = await similarity_search(query, db)
+  contexts = [doc.content for doc in retrieved_docs]
+  augmented_prompt = build_prompt(query, contexts)
 
-    client = Groq(api_key=GROQ_API_KEY)
-    completion = client.chat.completions.create(
-      model=LLM_MODEL,
-      messages=[{"role": "user", "content": augmented_prompt}],
-      max_completion_tokens=8192,
-      stream=False,
-    )
-    llm_answer = completion.choices[0].message.content.strip()
+  client = Groq(api_key=GROQ_API_KEY)
+  completion = client.chat.completions.create(
+    model=LLM_MODEL,
+    messages=[{"role": "user", "content": augmented_prompt}],
+    max_completion_tokens=8192,
+    stream=False,
+  )
+  llm_answer = completion.choices[0].message.content.strip()
 
-    return QueryResponse(answer=llm_answer, retrieved_docs=contexts)
+  return QueryResponse(answer=llm_answer, retrieved_docs=contexts)
 
