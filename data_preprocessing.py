@@ -17,7 +17,7 @@ def load_documents() -> List[Document]:
     docs: List[Document] = []
     count = 0
     for name in os.listdir(FILE_PATH):
-      if not name.lower().endswith(".pdf"):
+      if name.lower().endswith(".pdf"):
         count += 1
         path = os.path.join(FILE_PATH, name)
         pdf = pymupdf.open(path)
