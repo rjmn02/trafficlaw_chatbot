@@ -10,6 +10,7 @@ from typing import List
 from fastapi.middleware.cors import CORSMiddleware
 from data_preprocessing import clean_document_contents, embed_documents, load_documents, chunk_documents, embed_documents
 from rag_pipeline import generate_response
+from memory import ConversationMemory
 # The first part of the function, before the yield, will be executed before the application starts.
 # And the part after the yield will be executed after the application has finished.
 @asynccontextmanager
@@ -59,14 +60,17 @@ async def ingest_documents(session: AsyncSession):
     await session.rollback()
     print(f"Ingestion error: {e}")
   
-  
+memory = ConversationMemory(max_length=10)
 @app.post("/chat", response_model=QueryResponse)
 async def chat_endpoint(query_request: QueryRequest, db: AsyncSessionDep = AsyncSessionDep()):
-  response: QueryResponse = await generate_response(query_request, db)
+  # Add user query to memory
+  memory.add_message("user", query_request.query)
+  
+  # Generate response using memory context
+  response: QueryResponse = await generate_response(query_request, db, memory)
+  
+  # Add assistant response to memory
+  memory.add_message("assistant", response.answer)
+  
   return response
 
-
-# @app.get("/session/new")
-# async def new_session_endpoint():
-#   memory = ConversationMemory()
-#   return {"message": "New session created."}
