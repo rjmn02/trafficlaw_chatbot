@@ -35,7 +35,7 @@ async def similarity_search(query: str, db: AsyncSessionDep, top_k: Optional[int
   try:
     stmt = (
       select(Document)
-      .order_by(Document.embedding.op("<=>")(query_embedding))  # Using the <-> operator for cosine distance
+      .order_by(Document.embedding.op("<=>")(query_embedding))  # Using the <=> operator for cosine distance
       .limit(top_k)
     )
     result = await db.execute(stmt)
@@ -57,10 +57,12 @@ def build_prompt(query: str, contexts: List[str], history: List[dict]) -> str:
       conversation += f"{role}: {content}\n"
   
   template = """
-  You are a Philippine Traffic Law Chatbot that provides reliable, contextually grounded information about traffic laws and vehicle regulations in the Philippines.
+  You are a Philippine Traffic Law Chatbot that provides reliable, contextually grounded information about traffic laws and 
+  vehicle regulations in the Philippines.
 
   Rules:
-  - Use only the provided context to generate responses. If the answer is not in the context, say: "I don't know the answer based on Philippine traffic laws."
+  - Use only the provided context to generate responses. If the answer is not in the context, say: 
+    "I don't know the answer based on Philippine traffic laws."
   - Keep answers concise (1-5 sentences).
   - Stay within Philippine traffic and vehicle regulations only.
   - Cite specific laws, articles, or sections when relevant.
