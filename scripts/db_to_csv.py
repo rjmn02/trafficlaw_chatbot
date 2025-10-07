@@ -5,7 +5,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def db_to_csv(outfile: str = "D:/PROJECTS/trafficlaw_chatbot/data/processed/db_values.csv"):
+# PC PATH
+FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/processed/db_values.csv"
+
+# LAPTOP PATH
+# FILE_PATH = "D:/PROJECTS/trafficlaw_chatbot/data/processed/db_values.csv"
+
+def db_to_csv(outfile: str = FILE_PATH):
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         raise RuntimeError("DATABASE_URL env var not set")
