@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import os
 from groq import Groq
 from sqlalchemy import select
@@ -10,23 +9,6 @@ from typing import List, Optional
 from sentence_transformers import SentenceTransformer
 from langchain.prompts import ChatPromptTemplate
 from schemas.query import QueryRequest, QueryResponse
-=======
-from dotenv import load_dotenv
-from langchain.chat_models import init_chat_model
-from embedding_model import get_embedding_model
-from vector_store import get_vector_store
-from langchain.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-
-load_dotenv()
-
-# Configuration constants
-MODEL_NAME = "llama-3.1-8b-instant"
-# MODEL_NAME = "llama-3.3-70b-versatile"
-MODEL_PROVIDER = "groq"
-COLLECTION_NAME = "trafficlaw_docs"
-RETRIEVAL_K = 3
->>>>>>> main
 
 
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
@@ -39,12 +21,7 @@ embedding_model = SentenceTransformer(EMBEDDING_MODEL)
 groq_client = Groq(api_key=GROQ_API_KEY)
 # --- End of pre-loading ---
 
-def prompt_augmentation(query: str, context: str) -> str:
-  template = """
-  You are a Philippine Traffic Law Chatbot that provides reliable, contextually grounded information about traffic laws and vehicle regulations in the Philippines.
-  Follow these rules strictly when answering:
 
-<<<<<<< HEAD
 async def similarity_search(query: str, db: AsyncSessionDep, top_k: Optional[int] = DEFAULT_TOP_K) -> List[DocumentInDB]:
   query_embedding = embedding_model.encode(query)
   
@@ -129,22 +106,3 @@ async def generate_response(
   llm_answer = completion.choices[0].message.content
 
   return QueryResponse(answer=llm_answer, retrieved_docs=contexts)
-
-=======
-  - Use only the provided context to generate responses. If the answer is not in the context, say: “I don't know the answer based on Philippine traffic laws.”
-  - Always stay within the scope: Philippine traffic and vehicle regulations only. Do not provide unrelated legal or personal advice.
-  - Be clear, neutral, and user-friendly in tone.
-  - At the start of each conversation, remind the users: “This chatbot is for informational purposes only and not a substitute for professional legal advice.”
-  - 
-  Context:
-  {context}
-
-  User Query:
-  {query}
-
-  Answer:"""
-  
-  return ChatPromptTemplate.from_template(template)
-
-def build_rag(query: str):
->>>>>>> main
