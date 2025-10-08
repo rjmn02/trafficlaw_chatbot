@@ -6,24 +6,26 @@ import pymupdf
 import os
 import re
 from transformers import AutoTokenizer
+
 # PC PATH
 FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/raw/"
 
 # LAPTOP PATH
 # FILE_PATH = "D:/PROJECTS/trafficlaw_chatbot/data/raw/"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-CHUNK_SIZE = 256
-OVERLAP = 50
+CHUNK_SIZE = 200
+OVERLAP = 40
 EMBED_BATCH_SIZE = 64
 EMBED_DEVICE = "cpu"  # "cpu" or "cuda"
 
 _tokenizer = AutoTokenizer.from_pretrained(EMBEDDING_MODEL)
 _embedder = SentenceTransformer(EMBEDDING_MODEL, device=EMBED_DEVICE)
 
+
 # loading documents from the file path
 def load_documents() -> List[Document]:
   docs: List[Document] = []
-  
+
   for name in os.listdir(FILE_PATH):
     if name.lower().endswith(".pdf"):
       path = os.path.join(FILE_PATH, name)
@@ -31,17 +33,18 @@ def load_documents() -> List[Document]:
       content = "".join(page.get_text() for page in pdf)
       pdf.close()
       docs.append(Document(content=content, embedding=[], file_source=name))
-    
+
   print(f" Loaded {len(docs)} PDF documents.")
   return docs
+
 
 # cleaning document contents
 def clean_document_contents(documents: List[Document]) -> List[Document]:
   cleaned: List[Document] = []
   for d in documents:
     text = d.content
-    text = re.sub(r'\s+', ' ', text)
-    text = re.sub(r'[^\x20-\x7E\n]', '', text)
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"[^\x20-\x7E\n]", "", text)
     text = text.strip()
     cleaned.append(Document(content=text, embedding=[], file_source=d.file_source))
   return cleaned
@@ -50,22 +53,20 @@ def clean_document_contents(documents: List[Document]) -> List[Document]:
 # chunking and tokenizing
 def chunk_documents(documents: List[Document]):
   text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
-    tokenizer=_tokenizer,
-    chunk_size=CHUNK_SIZE,
-    chunk_overlap=OVERLAP
+    tokenizer=_tokenizer, chunk_size=CHUNK_SIZE, chunk_overlap=OVERLAP
   )
 
   chunked_docs: List[Document] = []
   for doc in documents:
     chunks = text_splitter.split_text(doc.content)
     for chunk in chunks:
-      chunked_docs.append(Document(content=chunk, file_source=doc.file_source, embedding=[]))  # Placeholder embedding
+      chunked_docs.append(Document(content=chunk, file_source=doc.file_source, embedding=[]))
 
   return chunked_docs
-  
+
+
 # embed and store documents
 async def embed_documents(documents: List[Document]) -> List[Document]:
-
   if not documents:
     return documents
   texts = [d.content for d in documents]
@@ -73,10 +74,10 @@ async def embed_documents(documents: List[Document]) -> List[Document]:
     texts,
     batch_size=EMBED_BATCH_SIZE,
     show_progress_bar=True,
-    normalize_embeddings=True  # good for cosine / <-> distance
+    normalize_embeddings=True,  # good for cosine / <-> distance
   )
   for doc, emb in zip(documents, embeddings):
     doc.embedding = emb.tolist()
-    
+
   print(f"Embeddings generated for {len(documents)} chunks (batch size={EMBED_BATCH_SIZE}).")
   return documents
