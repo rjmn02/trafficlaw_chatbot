@@ -13,7 +13,7 @@ from schemas.query import QueryRequest, QueryResponse
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 LLM_MODEL = "llama-3.1-8b-instant"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-DEFAULT_TOP_K = 15
+DEFAULT_TOP_K = 10
 
 # --- Pre-load models and clients for efficiency ---
 embedding_model = SentenceTransformer(EMBEDDING_MODEL)
