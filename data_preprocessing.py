@@ -13,8 +13,8 @@ FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/raw/"
 # LAPTOP PATH
 # FILE_PATH = "D:/PROJECTS/trafficlaw_chatbot/data/raw/"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-CHUNK_SIZE = 200
-OVERLAP = 40
+CHUNK_SIZE = 512
+OVERLAP = 100
 EMBED_BATCH_SIZE = 64
 EMBED_DEVICE = "cpu"  # "cpu" or "cuda"
 
