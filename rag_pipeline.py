@@ -13,7 +13,7 @@ from schemas.query import QueryRequest, QueryResponse
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 LLM_MODEL = "llama-3.1-8b-instant"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-DEFAULT_TOP_K = 10
+DEFAULT_TOP_K = 50
 
 # --- Pre-load models and clients for efficiency ---
 embedding_model = SentenceTransformer(EMBEDDING_MODEL)
@@ -55,9 +55,9 @@ def build_prompt(query: str, contexts: List[str], history: List[dict]) -> str:
 
   conversation = ""
   if history:
-    recent_history = history[-4:]
+    # Include ALL history instead of just the last 4 messages
     history_lines = []
-    for msg in recent_history:
+    for msg in history:
       role = msg["role"].upper()
       content = msg["content"]
       history_lines.append(f"{role}: {content}")
@@ -71,10 +71,11 @@ CONTEXT DOCUMENTS:
 {context_text}
 
 INSTRUCTIONS:
-1. Answer the question using ONLY the information provided in the context documents
-2. If multiple documents contain relevant information, synthesize them coherently
-3. If the context lacks sufficient information, state: "The available documents do not contain enough information to fully answer this question."
-4. Answer in 1-5 sentences
+1. Answer the question completely and accurately using ONLY the information in the context documents
+2. Include ALL relevant details: specific amounts, time periods, conditions, and penalties
+3. Structure multi-part answers clearly (e.g., "First offense: X, Second offense: Y")
+4. If information is missing, state what is not covered in the documents
+5. Do not add information not present in the context
 
 QUESTION: {query}
 
@@ -99,7 +100,7 @@ async def generate_response(
     messages=[{"role": "user", "content": augmented_prompt}],
     max_completion_tokens=1024,
     stream=False,
-    temperature=0.1,
+    temperature=0.3,
     top_p=0.9,
   )
   llm_answer = completion.choices[0].message.content
