@@ -67,10 +67,11 @@ async def ingest_documents(session: AsyncSession):
     await session.rollback()
     print(f"Ingestion error: {e}")
 
-memory = ConversationMemory(max_length=10)
+# memory = ConversationMemory(max_length=10)
 
 @app.post("/chat", response_model=QueryResponse)
 async def chat_endpoint(query_request: QueryRequest, db: AsyncSessionDep = AsyncSessionDep()):
+  # Retrieve or create a conversation memory for the current session_id
   memory = session_memories.setdefault(
     query_request.session_id, ConversationMemory(max_length=10)
   )
