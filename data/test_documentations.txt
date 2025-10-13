@@ -1,0 +1,8 @@
+PARAMS:
+
+Test 1:
+CHUNK SIZE = 512
+OVERLAP = 100
+DEFAULT_TOP_K = 30
+{'faithfulness': 0.8030, 'answer_relevancy': 0.7733}
+{'faithfulness': 0.7601, 'answer_relevancy': 0.7247}
