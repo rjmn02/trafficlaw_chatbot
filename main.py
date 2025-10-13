@@ -16,6 +16,7 @@ from data_preprocessing import (
 from rag_pipeline import generate_response
 from memory import ConversationMemory
 
+session_memories = {}
 
 # The first part of the function, before the yield, will be executed before the application starts.
 # And the part after the yield will be executed after the application has finished.
@@ -66,10 +67,14 @@ async def ingest_documents(session: AsyncSession):
     await session.rollback()
     print(f"Ingestion error: {e}")
 
-memory = ConversationMemory(max_length=10)
+# memory = ConversationMemory(max_length=10)
 
 @app.post("/chat", response_model=QueryResponse)
 async def chat_endpoint(query_request: QueryRequest, db: AsyncSessionDep = AsyncSessionDep()):
+  # Retrieve or create a conversation memory for the current session_id
+  memory = session_memories.setdefault(
+    query_request.session_id, ConversationMemory(max_length=10)
+  )
   # Add user query to memory
   memory.add_message("user", query_request.query)
 
