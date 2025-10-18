@@ -13,8 +13,8 @@ from transformers import AutoTokenizer
 # LAPTOP PATH
 FILE_PATH = "D:/TrafficLaw/data/raw"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-CHUNK_SIZE = 512
-OVERLAP = 100
+CHUNK_SIZE = 200
+OVERLAP = 40
 EMBED_BATCH_SIZE = 64
 EMBED_DEVICE = "cpu"  # "cpu" or "cuda"
 

@@ -6,3 +6,15 @@ OVERLAP = 100
 DEFAULT_TOP_K = 30
 {'faithfulness': 0.8030, 'answer_relevancy': 0.7733}
 {'faithfulness': 0.7601, 'answer_relevancy': 0.7247}
+
+
+Test 2:
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 50
+
+Test 3:
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 50
+elibrary.judiciary.gov.ph PDF COPIES
