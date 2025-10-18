@@ -6,10 +6,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # PC PATH
-FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/processed/db_values.csv"
+# FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/processed/db_values.csv"
 
 # LAPTOP PATH
-# FILE_PATH = "D:/TrafficLaw/data/processed/db_values.csv"
+FILE_PATH = "D:/TrafficLaw/data/processed/db_values.csv"
 
 
 def db_to_csv(outfile: str = FILE_PATH):
