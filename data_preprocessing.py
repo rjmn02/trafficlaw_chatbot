@@ -6,12 +6,15 @@ import pymupdf
 import os
 import re
 from transformers import AutoTokenizer
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # PC PATH
 # FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/raw/"
 
 # LAPTOP PATH
-FILE_PATH = "D:/TrafficLaw/data/raw"
+FILE_PATH = os.getenv("DATA_RAW_PATH", "")
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 CHUNK_SIZE = 200
 OVERLAP = 40
