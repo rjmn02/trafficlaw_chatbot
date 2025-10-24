@@ -9,3 +9,7 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
   answer: str
   retrieved_docs: List[str]
+
+class ClearSessionResponse(BaseModel):
+  cleared: bool
+  message: str
