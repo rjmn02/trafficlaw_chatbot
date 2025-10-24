@@ -10,8 +10,12 @@ from ragas.embeddings import LangchainEmbeddingsWrapper
 import pandas as pd
 from langchain_huggingface import HuggingFaceEmbeddings as LangchainHFEmbeddings
 import uuid
+import os
+from dotenv import load_dotenv
 
-TESTSET_FILEPATH = "D:/Projects/trafficlaw-chatbot/data/evaluation_testset.csv"
+load_dotenv()
+
+TESTSET_FILEPATH = os.getenv("EVAL_TESTSET_PATH", " ")
 
 async def main():
   df = pd.read_csv(TESTSET_FILEPATH)
@@ -42,7 +46,7 @@ async def main():
   llm_evaluator = LangchainLLMWrapper(
     ChatGroq(
       model="llama-3.3-70b-versatile",  # smaller for faster testing
-      timeout=5000,  # enough time
+      timeout=10000,  # enough time
       temperature=0.0,
     )
   )
