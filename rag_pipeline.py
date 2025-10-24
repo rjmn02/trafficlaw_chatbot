@@ -1,6 +1,6 @@
 import os
 from groq import Groq
-from sqlalchemy import func, select
+from sqlalchemy import select
 from memory import ConversationMemory
 from utils.database import AsyncSessionDep
 from models.document import Document
@@ -13,7 +13,7 @@ from schemas.query import QueryRequest, QueryResponse
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 LLM_MODEL = "llama-3.1-8b-instant"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-DEFAULT_TOP_K = 50
+DEFAULT_TOP_K = 30
 
 # --- Pre-load models and clients for efficiency ---
 embedding_model = SentenceTransformer(EMBEDDING_MODEL)

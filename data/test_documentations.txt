@@ -9,7 +9,6 @@ DEFAULT_TOP_K = 50
 {'faithfulness': 0.8449, 'answer_relevancy': 0.7553}
 
 
-
 Test 2:
 CHUNK SIZE = 200
 OVERLAP = 40
@@ -19,3 +18,15 @@ elibrary.judiciary.gov.ph PDF COPIES
 {'faithfulness': 0.7993, 'answer_relevancy': 0.7716}
 {'faithfulness': 0.8269, 'answer_relevancy': 0.7992}
 
+Test3: 
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 30
+elibrary.judiciary.gov.ph PDF COPIES
+
+
+Test4: 
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 70
+elibrary.judiciary.gov.ph PDF COPIES
