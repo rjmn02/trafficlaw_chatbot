@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+import logging
+from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from sqlalchemy import select, func
-from schemas.query import QueryRequest, QueryResponse
+from schemas.query import QueryRequest, QueryResponse, ClearSessionResponse 
 from utils.database import engine, async_session, AsyncSessionDep
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.base import Base  # ADDED IMPORT
@@ -16,7 +17,13 @@ from data_preprocessing import (
 from rag_pipeline import generate_response
 from memory import ConversationMemory
 
+
 session_memories = {}
+logging.basicConfig(
+  level=logging.INFO,
+  format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+) 
+logger = logging.getLogger(__name__)
 
 # The first part of the function, before the yield, will be executed before the application starts.
 # And the part after the yield will be executed after the application has finished.
@@ -52,7 +59,7 @@ async def ingest_documents(session: AsyncSession):
   try:
     existing = (await session.execute(select(func.count()).select_from(Document))).scalar() or 0
     if existing > 0:
-      print("Documents already ingested. Skipping.")
+      logger.info("Documents already ingested. Skipping.")
       return
 
     docs = load_documents()
@@ -62,26 +69,49 @@ async def ingest_documents(session: AsyncSession):
 
     session.add_all(docs)
     await session.commit()
-    print(f"Ingested {len(docs)} chunks.")
+    logger.info(f"Ingested {len(docs)} chunks.")
   except Exception as e:
     await session.rollback()
-    print(f"Ingestion error: {e}")
-
-# memory = ConversationMemory(max_length=10)
+    logger.exception(f"Ingestion error: {e}")
 
 @app.post("/chat", response_model=QueryResponse)
 async def chat_endpoint(query_request: QueryRequest, db: AsyncSessionDep = AsyncSessionDep()):
   # Retrieve or create a conversation memory for the current session_id
-  memory = session_memories.setdefault(
-    query_request.session_id, ConversationMemory(max_length=10)
-  )
+  try:
+    memory = session_memories.setdefault(
+      query_request.session_id, ConversationMemory(max_length=10)
+    )
+  except Exception as e:
+    logger.exception("Failed to initialize session memory for session_id=%s", getattr(query_request, "session_id", None))
+    raise HTTPException(status_code=500, detail="Failed to initialize session memory") from e
+  
   # Add user query to memory
-  memory.add_message("user", query_request.query)
-
+  try:
+    memory.add_message("user", query_request.query)
+  except Exception as e:
+    logger.exception("Failed to add user message to memory for session_id=%s", query_request.session_id)
+    raise HTTPException(status_code=500, detail="Failed to add user message to memory") from e
+  
   # Generate response using memory context
-  response: QueryResponse = await generate_response(query_request, db, memory)
-
+  try:
+    response: QueryResponse = await generate_response(query_request, db, memory)
+  except Exception as e:
+    logger.exception("Failed to generate response for session_id=%s", query_request.session_id)
+    raise HTTPException(status_code=500, detail="Failed to generate response") from e
+  
   # Add assistant response to memory
-  memory.add_message("assistant", response.answer)
-
+  try:
+    memory.add_message("assistant", response.answer)
+  except Exception as e:
+    logger.exception("Failed to add assistant message to memory for session_id=%s", query_request.session_id)
+    raise HTTPException(status_code=500, detail="Failed to add assistant message to memory") from e
+  
   return response
+
+# Endpoint to clear or delete session memory
+@app.delete("/sessions/{session_id}", response_model=ClearSessionResponse)
+async def clear_session(session_id: str):
+  removed = session_memories.pop(session_id, None)
+  if removed is None:
+    return ClearSessionResponse(cleared = False, message = "Session ID not found.")
+  return ClearSessionResponse(cleared = True, message = "Session memory cleared.")
