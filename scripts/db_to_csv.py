@@ -5,14 +5,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# PC PATH
-# FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/processed/db_values.csv"
-
-# LAPTOP PATH
-FILE_PATH = os.getenv("DATA_PROCESSED_PATH", "")
+DATA_PROCESSED_DIR = os.getenv("DATA_PROCESSED_PATH", "")
 
 
-def db_to_csv(outfile: str = FILE_PATH):
+def db_to_csv(outfile: str = None):
+  if outfile is None:
+    # Create the full file path by joining directory with filename
+    outfile = os.path.join(DATA_PROCESSED_DIR, "db_values.csv")
+  
+  # Ensure the directory exists
+  os.makedirs(os.path.dirname(outfile), exist_ok=True)
+  
   db_url = os.getenv("DATABASE_URL")
   if not db_url:
     raise RuntimeError("DATABASE_URL env var not set")

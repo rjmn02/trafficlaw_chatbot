@@ -13,7 +13,7 @@ from schemas.query import QueryRequest, QueryResponse
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 LLM_MODEL = "llama-3.1-8b-instant"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-DEFAULT_TOP_K = 30
+DEFAULT_TOP_K = 50
 
 # --- Pre-load models and clients for efficiency ---
 embedding_model = SentenceTransformer(EMBEDDING_MODEL)
@@ -43,12 +43,13 @@ async def similarity_search(
 
 
 # ---- Prompt Step with history ----
-def build_prompt(query: str, contexts: List[str], history: List[dict]) -> str:
-  # Improved prompt with better instructions
-  if contexts:
+def build_prompt(query: str, documents: List[DocumentInDB], history: List[dict]) -> str:
+  # Improved prompt with better instructions and document sources
+  if documents:
     numbered_contexts = []
-    for i, ctx in enumerate(contexts):
-      numbered_contexts.append(f"[Document {i + 1}]\n{ctx}")
+    for i, doc in enumerate(documents):
+      doc_name = doc.file_source if doc.file_source else "Unknown Document"
+      numbered_contexts.append(f"[Document {i + 1}: {doc_name}]\n{doc.content}")
     context_text = "\n\n".join(numbered_contexts)
   else:
     context_text = "No relevant documents found."
@@ -71,11 +72,12 @@ CONTEXT DOCUMENTS:
 {context_text}
 
 INSTRUCTIONS:
-1. Answer the question completely and accurately using ONLY the information in the context documents
-2. Include ALL relevant details: specific amounts, time periods, conditions, and penalties
-3. Structure multi-part answers clearly (e.g., "First offense: X, Second offense: Y")
-4. If information is missing, state what is not covered in the documents
-5. Do not add information not present in the context
+- Answer using ONLY the provided context
+- Include specific amounts, penalties, and time periods exactly as stated
+- Structure multi-part answers clearly (First offense: X, Second offense: Y)
+- State if information is missing from the context
+- Do not add information beyond what is provided
+- Answer concisely and clearly
 
 QUESTION: {query}
 
@@ -89,11 +91,10 @@ async def generate_response(
 ) -> QueryResponse:
   query = query_request.query
   retrieved_docs = await similarity_search(query, db)
-  contexts = [doc.content for doc in retrieved_docs]
 
   # Use conversation history if available
   history = memory.get_history() if memory else []
-  augmented_prompt = build_prompt(query, contexts, history)
+  augmented_prompt = build_prompt(query, retrieved_docs, history)  # Pass entire document objects
 
   completion = groq_client.chat.completions.create(
     model=LLM_MODEL,
@@ -105,4 +106,6 @@ async def generate_response(
   )
   llm_answer = completion.choices[0].message.content
 
+  # Extract contexts for response (if still needed)
+  contexts = [doc.content for doc in retrieved_docs]
   return QueryResponse(answer=llm_answer, retrieved_docs=contexts)
