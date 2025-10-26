@@ -13,7 +13,7 @@ from schemas.query import QueryRequest, QueryResponse
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 LLM_MODEL = "llama-3.1-8b-instant"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-DEFAULT_TOP_K = 30
+DEFAULT_TOP_K = 40
 
 # --- Pre-load models and clients for efficiency ---
 embedding_model = SentenceTransformer(EMBEDDING_MODEL)
@@ -29,7 +29,7 @@ async def similarity_search(
   query_embedding = embedding_model.encode(query, normalize_embeddings=True).tolist()
 
   try:
-    # PostgreSQL pgvector cosine distance operator
+    # PostgreSQL pgvector cosine distance operator <=>
     stmt = select(Document).order_by(Document.embedding.op("<=>")(query_embedding)).limit(top_k)
 
     result = await db.execute(stmt)
