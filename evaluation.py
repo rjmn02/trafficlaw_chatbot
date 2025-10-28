@@ -17,6 +17,7 @@ load_dotenv()
 
 TESTSET_FILEPATH = os.getenv("EVAL_TESTSET_PATH", " ")
 
+
 async def main():
   df = pd.read_csv(TESTSET_FILEPATH)
   user_input = df["user_query"].tolist()
@@ -46,7 +47,7 @@ async def main():
   llm_evaluator = LangchainLLMWrapper(
     ChatGroq(
       model="llama-3.3-70b-versatile",  # smaller for faster testing
-      timeout=10000,  # enough time
+      timeout=30000,  # enough time
       temperature=0.0,
     )
   )
@@ -64,6 +65,9 @@ async def main():
     embeddings=embeddings,
     raise_exceptions=True,
   )
+  
+  df_res = result.to_pandas()
+  df_res.to_csv(os.getenv("EVAL_RESULT_PATH"), index=False)
 
   print(result)
 

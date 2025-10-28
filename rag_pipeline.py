@@ -13,7 +13,7 @@ from schemas.query import QueryRequest, QueryResponse
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 LLM_MODEL = "llama-3.1-8b-instant"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-DEFAULT_TOP_K = 40
+DEFAULT_TOP_K = 10
 
 # --- Pre-load models and clients for efficiency ---
 embedding_model = SentenceTransformer(EMBEDDING_MODEL)
@@ -49,7 +49,7 @@ def build_prompt(query: str, documents: List[DocumentInDB], history: List[dict])
     numbered_contexts = []
     for i, doc in enumerate(documents):
       doc_name = doc.file_source if doc.file_source else "Unknown Document"
-      numbered_contexts.append(f"[Document {i + 1}: {doc_name}]\n{doc.content}")
+      numbered_contexts.append(f"[Document {doc_name}: ]\n{doc.content}")
     context_text = "\n\n".join(numbered_contexts)
   else:
     context_text = "No relevant documents found."
