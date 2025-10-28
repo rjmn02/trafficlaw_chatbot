@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:python": "./venv312/bin/uvicorn main:app --reload --host 127.0.0.1 --port 8000",
-    "dev:api": "npm --workspace apps/api run dev",
-    "dev:web": "npm --workspace apps/web run dev",
+    "dev:python": "PYTHONPATH=./backend ./venv312/bin/uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:api": "npm --workspace frontend/api run dev",
+    "dev:web": "npm --workspace frontend/web run dev",
     "dev": "concurrently -k -n python,api,web -c red,green,cyan \"npm run dev:python\" \"npm run dev:api\" \"npm run dev:web\"",
-    "build": "npm --workspace apps/web run build && npm --workspace apps/api run build",
-    "start": "npm --workspace apps/web run start"
+    "build": "npm --workspace frontend/web run build && npm --workspace frontend/api run build",
+    "start": "npm --workspace frontend/web run start"
   },
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
   "homepage": "https://github.com/rjmn02/trafficlaw_chatbot#readme",
   "private": true,
   "workspaces": [
-    "apps/*",
+    "frontend/*",
     "packages/*"
   ],
   "devDependencies": {

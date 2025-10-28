@@ -4,22 +4,17 @@
 
 ```
 trafficlaw_chatbot/
-├── apps/
+├── frontend/
 │   ├── web/                 # Next.js Frontend (port 3000)
-│   │   ├── src/app/page.tsx
-│   │   └── package.json
 │   └── api/                 # Next.js API Gateway (port 3001)
-│       ├── src/app/api/
-│       │   ├── chat/route.ts
-│       │   ├── sessions/[sessionId]/route.ts
-│       │   └── health/route.ts
-│       └── package.json
-├── main.py                  # Python Backend (port 8000)
-├── rag_pipeline.py
-├── data_preprocessing.py
-├── models/
-├── schemas/
-├── utils/
+├── backend/                 # Python Backend (port 8000)
+│   ├── main.py
+│   ├── rag_pipeline.py
+│   ├── data_preprocessing.py
+│   ├── models/
+│   ├── schemas/
+│   ├── utils/
+│   └── scripts/
 └── data/
     └── raw/                 # PDF corpus
 ```
