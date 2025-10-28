@@ -1,6 +1,6 @@
 import os
 from groq import Groq
-from sqlalchemy import func, select
+from sqlalchemy import select
 from memory import ConversationMemory
 from utils.database import AsyncSessionDep
 from models.document import Document
@@ -13,7 +13,7 @@ from schemas.query import QueryRequest, QueryResponse
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 LLM_MODEL = "llama-3.1-8b-instant"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-DEFAULT_TOP_K = 50
+DEFAULT_TOP_K = 10
 
 # --- Pre-load models and clients for efficiency ---
 embedding_model = SentenceTransformer(EMBEDDING_MODEL)
@@ -29,7 +29,7 @@ async def similarity_search(
   query_embedding = embedding_model.encode(query, normalize_embeddings=True).tolist()
 
   try:
-    # PostgreSQL pgvector cosine distance operator
+    # PostgreSQL pgvector cosine distance operator <=>
     stmt = select(Document).order_by(Document.embedding.op("<=>")(query_embedding)).limit(top_k)
 
     result = await db.execute(stmt)
@@ -49,7 +49,7 @@ def build_prompt(query: str, documents: List[DocumentInDB], history: List[dict])
     numbered_contexts = []
     for i, doc in enumerate(documents):
       doc_name = doc.file_source if doc.file_source else "Unknown Document"
-      numbered_contexts.append(f"[Document {i + 1}: {doc_name}]\n{doc.content}")
+      numbered_contexts.append(f"[Document {doc_name}: ]\n{doc.content}")
     context_text = "\n\n".join(numbered_contexts)
   else:
     context_text = "No relevant documents found."
