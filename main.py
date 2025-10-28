@@ -41,7 +41,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 origins = [
-  "http://localhost:5173",
+  "http://localhost:3000",  # Next.js frontend
+  "http://localhost:3001",  # Next.js API
+  "http://localhost:5173",  # Vite/other dev servers
   "http://127.0.0.1:8000",
 ]
 
