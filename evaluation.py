@@ -47,8 +47,9 @@ async def main():
   llm_evaluator = LangchainLLMWrapper(
     ChatGroq(
       model="llama-3.3-70b-versatile",  # smaller for faster testing
-      timeout=30000,  # enough time
+      timeout=70000,  # enough time
       temperature=0.0,
+      max_retries=5,
     )
   )
 
