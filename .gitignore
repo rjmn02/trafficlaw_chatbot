@@ -4,3 +4,15 @@ data/processed/
 data/raw/
 venv
 __pycache__/
+.DS_Store
+node_modules/
+
+# Next.js build output
+frontend/*/.next/
+frontend/*/out/
+
+# Local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
