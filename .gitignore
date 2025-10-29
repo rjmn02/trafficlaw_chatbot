@@ -1,5 +1,4 @@
 .env
-data/evaluation_results/
 data/processed/
 data/raw/
 venv

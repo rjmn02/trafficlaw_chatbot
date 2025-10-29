@@ -1,0 +1,47 @@
+PARAMS:
+
+
+Test 1:
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 10
+elibrary.judiciary.gov.ph PDF COPIES
+{'faithfulness': 0.8039, 'answer_relevancy': 0.7095}
+{'faithfulness': 0.8192, 'answer_relevancy': 0.7238}
+{'faithfulness': 0.7716, 'answer_relevancy': 0.6998}
+
+Test2: 
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 20
+elibrary.judiciary.gov.ph PDF COPIES
+{'faithfulness': 0.8639, 'answer_relevancy': 0.7914}
+{'faithfulness': 0.8791, 'answer_relevancy': 0.7747}
+{'faithfulness': 0.8541, 'answer_relevancy': 0.7467}
+
+Test3: 
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 30
+elibrary.judiciary.gov.ph PDF COPIES
+{'faithfulness': 0.8697, 'answer_relevancy': 0.7777}
+{'faithfulness': 0.8733, 'answer_relevancy': 0.7511}
+{'faithfulness': 0.8754, 'answer_relevancy': 0.7681}
+
+Test4: 
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 40
+elibrary.judiciary.gov.ph PDF COPIES
+{'faithfulness': 0.8522, 'answer_relevancy': 0.7650}
+{'faithfulness': 0.8570, 'answer_relevancy': 0.7739}
+{'faithfulness': 0.8721, 'answer_relevancy': 0.7649}
+
+Test5: 
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 50
+elibrary.judiciary.gov.ph PDF COPIES
+{'faithfulness': 0.8757, 'answer_relevancy': 0.7865}
+{'faithfulness': 0.8411, 'answer_relevancy': 0.7981}
+{'faithfulness': 0.8699, 'answer_relevancy': 0.8192}
