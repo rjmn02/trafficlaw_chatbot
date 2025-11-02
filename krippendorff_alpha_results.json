@@ -1,0 +1,18 @@
+{
+  "krippendorff_alpha": 0.6838235294117647,
+  "pairwise_agreements": {
+    "rater_1_vs_rater_2": {
+      "agreement": 0.9367088607594937,
+      "n_pairs": 79
+    },
+    "rater_1_vs_rater_3": {
+      "agreement": 0.9113924050632911,
+      "n_pairs": 79
+    },
+    "rater_2_vs_rater_3": {
+      "agreement": 0.9240506329113924,
+      "n_pairs": 79
+    }
+  },
+  "total_items": 79,
+  "items_with_all_ratings": 
