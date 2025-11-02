@@ -39,6 +39,7 @@ export default function Home() {
     switchToSession,
     deleteSession,
     onNewChat,
+    renameSession,
   } = useSessions(sessionIdRef, messages, query, setQuery);
 
 
@@ -88,29 +89,29 @@ export default function Home() {
 
   return (
     <main className="w-full h-screen flex relative overflow-hidden" style={{ backgroundColor: COLORS.background }}>
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay - removed click to close functionality */}
       {sidebarOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-30 z-30"
-          onClick={() => setSidebarOpen(false)}
+          className="md:hidden fixed inset-0 bg-black bg-opacity-30 z-30 pointer-events-none"
         />
       )}
 
-      <Sidebar
-        sessions={sessions}
-        filteredSessions={filteredSessions}
-        currentSessionId={sessionIdRef.current}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        sidebarOpen={sidebarOpen}
-        sidebarCollapsed={sidebarCollapsed}
-        setSidebarCollapsed={setSidebarCollapsed}
-        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        onNewChat={handleNewChat}
-        onSwitchSession={handleSwitchSession}
-        onDeleteSession={handleDeleteSession}
-        loading={loading}
-      />
+          <Sidebar
+            sessions={sessions}
+            filteredSessions={filteredSessions}
+            currentSessionId={sessionIdRef.current}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            sidebarOpen={sidebarOpen}
+            sidebarCollapsed={sidebarCollapsed}
+            setSidebarCollapsed={setSidebarCollapsed}
+            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            onNewChat={handleNewChat}
+            onSwitchSession={handleSwitchSession}
+            onDeleteSession={handleDeleteSession}
+            onRenameSession={renameSession}
+            loading={loading}
+          />
 
       {/* Main column */}
       <section className="flex-1 flex flex-col h-screen overflow-hidden">

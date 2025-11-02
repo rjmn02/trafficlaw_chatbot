@@ -2,6 +2,7 @@
 import React from 'react';
 import { StoredSession } from '../types';
 import { COLORS } from '../constants';
+import { IconMenu, IconPlus, IconSearch, IconMessage, IconEdit, IconTrash, IconChevronRight, IconChevronLeft, IconMessageSquare } from '../icons';
 
 interface SidebarProps {
   sessions: StoredSession[];
@@ -16,6 +17,7 @@ interface SidebarProps {
   onNewChat: () => void;
   onSwitchSession: (id: string) => void;
   onDeleteSession: (id: string) => void;
+  onRenameSession: (id: string, newTitle: string) => void;
   loading: boolean;
 }
 
@@ -32,22 +34,45 @@ export function Sidebar({
   onNewChat,
   onSwitchSession,
   onDeleteSession,
+  onRenameSession,
   loading,
 }: SidebarProps) {
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editValue, setEditValue] = React.useState<string>("");
+  const editInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const handleStartEdit = (session: StoredSession, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingId(session.id);
+    setEditValue(session.title);
+    setTimeout(() => editInputRef.current?.focus(), 0);
+  };
+
+  const handleSaveEdit = (id: string, e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (editValue.trim()) {
+      onRenameSession(id, editValue.trim());
+    }
+    setEditingId(null);
+    setEditValue("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditValue("");
+  };
   return (
     <>
       {/* Mobile Menu Button */}
       <button
         onClick={onToggleSidebar}
-        className="fixed left-4 top-4 z-50 md:hidden p-2 rounded-lg shadow-lg transition-all"
+        className="fixed right-4 top-4 z-50 md:hidden p-2 rounded-lg shadow-lg transition-all"
         style={{ backgroundColor: COLORS.primary, color: '#ffffff' }}
         onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = COLORS.accent; }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = COLORS.primary; }}
         aria-label="Toggle sidebar"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-          <path fillRule="evenodd" d="M3 6.75A.75.75 0 013.75 6h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 6.75zM3 12a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 12zm0 5.25a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75z" clipRule="evenodd" />
-        </svg>
+        <IconMenu className="w-6 h-6" />
       </button>
 
       {/* Sidebar - ChatGPT Style */}
@@ -70,10 +95,7 @@ export function Sidebar({
                 onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = COLORS.primary; }}
                 disabled={loading}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path d="M8 9a1 1 0 011-1h6a1 1 0 110 2H9a1 1 0 01-1-1zM8 13a1 1 0 011-1h4a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                  <path fillRule="evenodd" d="M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm2 0v14h14V5H5z" clipRule="evenodd" />
-                </svg>
+                <IconPlus className="w-4 h-4" />
                 <span>New chat</span>
               </button>
               <div className="relative">
@@ -89,9 +111,7 @@ export function Sidebar({
                     color: COLORS.dark
                   }}
                 />
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2" style={{ color: COLORS.accent }}>
-                  <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z" clipRule="evenodd" />
-                </svg>
+                <IconSearch className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2" style={{ color: COLORS.accent }} />
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-2 min-h-0">
@@ -109,52 +129,118 @@ export function Sidebar({
                       backgroundColor: currentSessionId === s.id ? COLORS.primary : 'transparent',
                       color: COLORS.dark
                     }}
-                    onClick={() => onSwitchSession(s.id)}
+                    onClick={() => {
+                      if (editingId !== s.id) {
+                        onSwitchSession(s.id);
+                      }
+                    }}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0" style={{ color: currentSessionId === s.id ? COLORS.dark : COLORS.accent }}>
-                      <path fillRule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clipRule="evenodd" />
-                    </svg>
-                    <span className="flex-1 text-sm truncate">{s.title || 'Untitled'}</span>
-                    <button 
-                      className="opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg active:scale-90" 
-                      style={{ 
-                        color: COLORS.accent,
-                        backgroundColor: 'transparent'
-                      }}
-                      onMouseEnter={(e) => {
-                        const target = e.currentTarget;
-                        if (target) {
-                          target.style.backgroundColor = '#99482820';
-                          target.style.color = COLORS.accent;
-                          target.style.transform = 'scale(1.1)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        const target = e.currentTarget;
-                        if (target) {
-                          target.style.backgroundColor = 'transparent';
-                          target.style.transform = 'scale(1)';
-                        }
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const target = e.currentTarget;
-                        if (!target) return;
-                        target.style.transform = 'scale(0.9)';
-                        target.style.backgroundColor = '#99482840';
-                        setTimeout(() => {
-                          if (target) {
-                            target.style.transform = 'scale(1)';
-                          }
-                          onDeleteSession(s.id);
-                        }, 150);
-                      }}
-                      title="Delete chat"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                        <path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clipRule="evenodd" />
-                      </svg>
-                    </button>
+                    <IconMessage className="w-4 h-4 flex-shrink-0" style={{ color: currentSessionId === s.id ? COLORS.dark : COLORS.accent }} />
+                    {editingId === s.id ? (
+                      <form 
+                        onSubmit={(e) => handleSaveEdit(s.id, e)}
+                        className="flex-1 flex items-center gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <input
+                          ref={editInputRef}
+                          type="text"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={() => handleSaveEdit(s.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Escape') {
+                              handleCancelEdit();
+                            } else if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSaveEdit(s.id);
+                            }
+                          }}
+                          className="flex-1 text-sm px-2 py-1 rounded border focus:outline-none focus:ring-1"
+                          style={{ 
+                            borderColor: COLORS.accent,
+                            backgroundColor: '#ffffff',
+                            color: COLORS.dark
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          autoFocus
+                        />
+                      </form>
+                    ) : (
+                      <>
+                        <span 
+                          className="flex-1 text-sm truncate"
+                          onDoubleClick={(e) => handleStartEdit(s, e)}
+                          title="Double-click to rename"
+                        >
+                          {s.title || 'Untitled'}
+                        </span>
+                        <button 
+                          className="opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg active:scale-90" 
+                          style={{ 
+                            color: COLORS.accent,
+                            backgroundColor: 'transparent'
+                          }}
+                          onMouseEnter={(e) => {
+                            const target = e.currentTarget;
+                            if (target) {
+                              target.style.backgroundColor = '#99482820';
+                              target.style.color = COLORS.accent;
+                              target.style.transform = 'scale(1.1)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            const target = e.currentTarget;
+                            if (target) {
+                              target.style.backgroundColor = 'transparent';
+                              target.style.transform = 'scale(1)';
+                            }
+                          }}
+                          onClick={(e) => handleStartEdit(s, e)}
+                          title="Rename chat"
+                        >
+                          <IconEdit />
+                        </button>
+                        <button 
+                          className="opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg active:scale-90" 
+                          style={{ 
+                            color: COLORS.accent,
+                            backgroundColor: 'transparent'
+                          }}
+                          onMouseEnter={(e) => {
+                            const target = e.currentTarget;
+                            if (target) {
+                              target.style.backgroundColor = '#99482820';
+                              target.style.color = COLORS.accent;
+                              target.style.transform = 'scale(1.1)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            const target = e.currentTarget;
+                            if (target) {
+                              target.style.backgroundColor = 'transparent';
+                              target.style.transform = 'scale(1)';
+                            }
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const target = e.currentTarget;
+                            if (!target) return;
+                            target.style.transform = 'scale(0.9)';
+                            target.style.backgroundColor = '#99482840';
+                            setTimeout(() => {
+                              if (target) {
+                                target.style.transform = 'scale(1)';
+                              }
+                              onDeleteSession(s.id);
+                            }, 150);
+                          }}
+                          title="Delete chat"
+                        >
+                          <IconTrash />
+                        </button>
+                      </>
+                    )}
                   </div>
                 ))}
                 {filteredSessions.length === 0 && (
@@ -183,10 +269,7 @@ export function Sidebar({
               }}
               disabled={loading}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                <path d="M8 9a1 1 0 011-1h6a1 1 0 110 2H9a1 1 0 01-1-1zM8 13a1 1 0 011-1h4a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                <path fillRule="evenodd" d="M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm2 0v14h14V5H5z" clipRule="evenodd" />
-              </svg>
+              <IconPlus className="w-5 h-5" />
               <div className="tooltip absolute left-full ml-2 px-2 py-1 rounded text-xs whitespace-nowrap pointer-events-none opacity-0 transition-opacity z-50" style={{ backgroundColor: COLORS.dark, color: COLORS.background }}>
                 New chat
               </div>
@@ -204,9 +287,7 @@ export function Sidebar({
                     color: COLORS.dark
                   }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 mx-auto" style={{ color: currentSessionId === s.id ? COLORS.dark : COLORS.accent }}>
-                    <path fillRule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clipRule="evenodd" />
-                  </svg>
+                  <IconMessageSquare className="w-5 h-5 mx-auto" style={{ color: currentSessionId === s.id ? COLORS.dark : COLORS.accent }} />
                   <div className="tooltip absolute left-full ml-2 px-2 py-1 rounded text-xs whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50" style={{ backgroundColor: COLORS.dark, color: COLORS.background }}>
                     {s.title || 'Untitled'}
                   </div>
@@ -215,8 +296,8 @@ export function Sidebar({
             </div>
           </div>
         )}
-        {/* Collapse Button */}
-        <div className="p-2 border-t" style={{ borderColor: COLORS.accent }}>
+        {/* Collapse Button - Hidden on mobile */}
+        <div className="hidden md:block p-2 border-t" style={{ borderColor: COLORS.accent }}>
           <button
             onClick={(e) => {
               const target = e.currentTarget;
@@ -251,13 +332,9 @@ export function Sidebar({
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {sidebarCollapsed ? (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                <path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" />
-              </svg>
+              <IconChevronRight className="w-5 h-5" />
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                <path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" />
-              </svg>
+              <IconChevronLeft className="w-5 h-5" />
             )}
             {!sidebarCollapsed && (
               <div className="tooltip absolute left-full ml-2 px-2 py-1 rounded text-xs whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50" style={{ backgroundColor: COLORS.dark, color: COLORS.background }}>
