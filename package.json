@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:python": "PYTHONPATH=./backend ./venv312/bin/uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:python": "node scripts/run-python.js",
     "dev:api": "npm --workspace frontend/api run dev",
     "dev:web": "npm --workspace frontend/web run dev",
     "dev": "concurrently -k -n python,api,web -c red,green,cyan \"npm run dev:python\" \"npm run dev:api\" \"npm run dev:web\"",
