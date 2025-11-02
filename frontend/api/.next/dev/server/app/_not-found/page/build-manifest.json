@@ -14,8 +14,8 @@
     "static/chunks/node_modules_next_dist_client_a38d7d69._.js",
     "static/chunks/node_modules_next_dist_4b2403f5._.js",
     "static/chunks/node_modules_@swc_helpers_cjs_d80fb378._.js",
-    "static/chunks/apps_api_a0ff3932._.js",
-    "static/chunks/turbopack-apps_api_86f4650b._.js"
+    "static/chunks/frontend_api_a0ff3932._.js",
+    "static/chunks/turbopack-frontend_api_86f4650b._.js"
   ],
   "pages": {},
   "ampFirstPages": []

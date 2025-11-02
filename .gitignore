@@ -10,6 +10,7 @@ node_modules/
 # Next.js build output
 frontend/*/.next/
 frontend/*/out/
+frontend/*/tsconfig.tsbuildinfo
 
 # Local env files
 .env.local

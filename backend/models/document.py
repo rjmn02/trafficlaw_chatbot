@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from pgvector.sqlalchemy import Vector
 import datetime
 from sqlalchemy.orm import Mapped, mapped_column
-from models.base import Base  # ADDED IMPORT
+from models.base import Base
 
 class Document(Base):
   __tablename__ = 'document'

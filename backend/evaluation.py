@@ -29,8 +29,10 @@ async def main():
     for query, reference in zip(user_input, expected_responses):
       session_id = str(uuid.uuid4())
       request = QueryRequest(query=query, session_id=session_id)
-      response: QueryResponse = await generate_response(request, db)
-      print(response.answer)
+      # Note: evaluation doesn't use conversation memory (each query is independent)
+      response: QueryResponse = await generate_response(request, db, memory=None)
+      # Note: Uncomment for debugging output
+      # print(response.answer)
 
       dataset.append(
         {
@@ -69,7 +71,9 @@ async def main():
   df_res = result.to_pandas()
   df_res.to_csv(os.getenv("EVAL_RESULT_PATH"), index=False)
 
-  print(result)
+  # Print evaluation results (useful for script output)
+  print(f"Evaluation complete. Results saved to {os.getenv('EVAL_RESULT_PATH')}")
+  print(f"Metrics summary: {result}")
 
 
 if __name__ == "__main__":

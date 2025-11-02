@@ -41,6 +41,22 @@ Next.js Frontend
 User Interface
 ```
 
+## Localhost Endpoints (dev)
+
+When running locally with `npm run dev`:
+
+- Frontend (Next.js web): `http://localhost:3000`
+
+- Next.js API Gateway (proxy): `http://localhost:3001`
+  - Health: `http://localhost:3001/api/health`
+  - Chat: `http://localhost:3001/api/chat`  [POST]
+  - Clear Session: `http://localhost:3001/api/sessions/{sessionId}`  [DELETE]
+
+- Python Backend (FastAPI): `http://localhost:8000`
+  - Docs: `http://localhost:8000/docs`
+  - Chat: `http://localhost:8000/chat`  [POST]
+  - Clear Session: `http://localhost:8000/sessions/{session_id}`  [DELETE]
+
 ## Services
 
 | Service | Port | Purpose |

@@ -78,5 +78,6 @@ async def embed_documents(documents: List[Document]) -> List[Document]:
   for doc, emb in zip(documents, embeddings):
     doc.embedding = emb.tolist()
 
+  # Log embedding completion (using print for script output is acceptable)
   print(f"Embeddings generated for {len(documents)} chunks (batch size={EMBED_BATCH_SIZE}).")
   return documents

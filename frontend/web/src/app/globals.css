@@ -24,3 +24,7 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+textarea::placeholder {
+  color: rgba(153, 72, 40, 0.5);
+}

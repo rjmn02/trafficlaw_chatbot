@@ -1,4 +1,5 @@
 import os
+import logging
 from groq import Groq
 from sqlalchemy import select
 from memory import ConversationMemory
@@ -9,11 +10,13 @@ from typing import List, Optional
 from sentence_transformers import SentenceTransformer
 from schemas.query import QueryRequest, QueryResponse
 
+logger = logging.getLogger(__name__)
+
 
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 LLM_MODEL = "llama-3.1-8b-instant"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-DEFAULT_TOP_K = 10
+DEFAULT_TOP_K = 10  # Reduced from 20 for faster responses and smaller prompts
 
 # --- Pre-load models and clients for efficiency ---
 embedding_model = SentenceTransformer(EMBEDDING_MODEL)
@@ -26,10 +29,13 @@ async def similarity_search(
   db: AsyncSessionDep,
   top_k: Optional[int] = DEFAULT_TOP_K,
 ) -> List[DocumentInDB]:
-  query_embedding = embedding_model.encode(query, normalize_embeddings=True).tolist()
+  # Generate embedding (blocking I/O, but fast with pre-loaded model)
+  query_embedding = embedding_model.encode(query, normalize_embeddings=True, show_progress_bar=False).tolist()
 
   try:
     # PostgreSQL pgvector cosine distance operator <=>
+    # Ensure you have an index on the embedding column for fast searches:
+    # CREATE INDEX ON document USING ivfflat (embedding vector_cosine_ops);
     stmt = select(Document).order_by(Document.embedding.op("<=>")(query_embedding)).limit(top_k)
 
     result = await db.execute(stmt)
@@ -38,7 +44,8 @@ async def similarity_search(
     return results
 
   except Exception as e:
-    print(f"Error during similarity search: {e}")
+    # Log error but don't expose details to client
+    logger.error(f"Error during similarity search: {e}")
     return []
 
 
@@ -56,15 +63,16 @@ def build_prompt(query: str, documents: List[DocumentInDB], history: List[dict])
 
   conversation = ""
   if history:
-    # Include ALL history instead of just the last 4 messages
+    # Limit to last 6 messages (3 exchanges) to keep prompt size manageable
+    recent_history = history[-6:] if len(history) > 6 else history
     history_lines = []
-    for msg in history:
+    for msg in recent_history:
       role = msg["role"].upper()
       content = msg["content"]
       history_lines.append(f"{role}: {content}")
     conversation = "\nPrevious conversation:\n" + "\n".join(history_lines) + "\n"
 
-  template = f"""You are an expert assistant on Philippine traffic laws and vehicle regulations.
+  template = f"""You are a helpful and friendly expert assistant on Philippine traffic laws and vehicle regulations.
 
 {conversation if conversation else ""}
 
@@ -72,11 +80,12 @@ CONTEXT DOCUMENTS:
 {context_text}
 
 INSTRUCTIONS:
-- Answer using ONLY the provided context
+- If the user greets you or makes casual conversation, respond warmly and briefly, then invite them to ask about traffic laws
+- For traffic law questions: Answer using ONLY the provided context documents
 - Include specific amounts, penalties, and time periods exactly as stated
 - Structure multi-part answers clearly (First offense: X, Second offense: Y)
-- State if information is missing from the context
-- Do not add information beyond what is provided
+- If the question isn't about traffic laws or no relevant context is found, politely explain that you specialize in Philippine traffic laws
+- Do not add information beyond what is provided in the context
 - Answer concisely and clearly
 
 QUESTION: {query}
@@ -96,13 +105,15 @@ async def generate_response(
   history = memory.get_history() if memory else []
   augmented_prompt = build_prompt(query, retrieved_docs, history)  # Pass entire document objects
 
+  # Use timeout to prevent hanging requests
   completion = groq_client.chat.completions.create(
     model=LLM_MODEL,
     messages=[{"role": "user", "content": augmented_prompt}],
-    max_completion_tokens=1024,
+    max_completion_tokens=512,  # Reduced from 1024 for faster responses
     stream=False,
     temperature=0.3,
     top_p=0.9,
+    timeout=30.0,  # 30 second timeout
   )
   llm_answer = completion.choices[0].message.content
 
