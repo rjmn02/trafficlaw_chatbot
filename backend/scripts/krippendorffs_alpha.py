@@ -2,7 +2,7 @@ import pandas as pd
 import krippendorff
 
 # Global variable for CSV file path
-CSV_FILE_PATH = "D:/Projects/trafficlaw-chatbot/scripts/interrater_evaluation - likert_results_k=20_run_1.csv"
+CSV_FILE_PATH = "D:/Projects/trafficlaw-chatbot/data/interrater_evaluation - likert_results_k=20_run_1.csv"
 
 df = pd.read_csv(CSV_FILE_PATH)
 

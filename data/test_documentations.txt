@@ -50,8 +50,9 @@ elibrary.judiciary.gov.ph PDF COPIES
 Krippendorffs Alpha:
 this run: 
 {'faithfulness': 0.8639, 'answer_relevancy': 0.7914}
-a = 0.8920731707317073
-
+0.93001865341449
+{'faithfulness': 0.8791, 'answer_relevancy': 0.7747}
+{'faithfulness': 0.8541, 'answer_relevancy': 0.7467}
 
 Name counts:
 FDM-Vol.-1-2nd-Edition.pdf: 222
