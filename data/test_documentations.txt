@@ -1,0 +1,84 @@
+PARAMS:
+
+
+Test 1:
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 10
+elibrary.judiciary.gov.ph PDF COPIES
+{'faithfulness': 0.8039, 'answer_relevancy': 0.7095}
+{'faithfulness': 0.8192, 'answer_relevancy': 0.7238}
+{'faithfulness': 0.7716, 'answer_relevancy': 0.6998}
+
+Test2: 
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 20
+elibrary.judiciary.gov.ph PDF COPIES
+{'faithfulness': 0.8639, 'answer_relevancy': 0.7914}
+{'faithfulness': 0.8791, 'answer_relevancy': 0.7747}
+{'faithfulness': 0.8541, 'answer_relevancy': 0.7467}
+
+Test3: 
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 30
+elibrary.judiciary.gov.ph PDF COPIES
+{'faithfulness': 0.8697, 'answer_relevancy': 0.7777}
+{'faithfulness': 0.8733, 'answer_relevancy': 0.7511}
+{'faithfulness': 0.8754, 'answer_relevancy': 0.7681}
+
+Test4: 
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 40
+elibrary.judiciary.gov.ph PDF COPIES
+{'faithfulness': 0.8522, 'answer_relevancy': 0.7650}
+{'faithfulness': 0.8570, 'answer_relevancy': 0.7739}
+{'faithfulness': 0.8721, 'answer_relevancy': 0.7649}
+
+Test5: 
+CHUNK SIZE = 200
+OVERLAP = 40
+DEFAULT_TOP_K = 50
+elibrary.judiciary.gov.ph PDF COPIES
+{'faithfulness': 0.8757, 'answer_relevancy': 0.7865}
+{'faithfulness': 0.8411, 'answer_relevancy': 0.7981}
+{'faithfulness': 0.8699, 'answer_relevancy': 0.8192}
+
+
+Krippendorffs Alpha:
+this run: 
+{'faithfulness': 0.8639, 'answer_relevancy': 0.7914}
+a = 0.8920731707317073
+
+
+Name counts:
+FDM-Vol.-1-2nd-Edition.pdf: 222
+FDM-vol.-2-2nd-Edition.pdf: 135
+REPUBLIC ACT NO. 4136.pdf: 113
+REPUBLIC ACT NO. 8749.pdf: 101
+IRR of REPUBLIC ACT NO. 11697.pdf: 75
+IRR of Republic Act No. 10930.pdf: 52
+REPUBLIC ACT NO. 11697.pdf: 51
+IRR of REPUBLIC ACT NO. 10586.pdf: 35
+REPUBLIC ACT NO. 11235.pdf: 24
+REPUBLIC ACT NO. 10586.pdf: 20
+REPUBLIC ACT NO. 11229.pdf: 19
+REPUBLIC ACT NO. 8794.pdf: 18
+IRR of REPUBLIC ACT NO. 10913.pdf: 16
+REPUBLIC ACT NO. 8750.pdf: 16
+REPUBLIC ACT NO. 10913.pdf: 14
+Republic Act No. 10930.pdf: 14
+REPUBLIC ACT NO. 12209.pdf: 14
+IRR of REPUBLIC ACT NO. 10666.pdf: 13
+REPUBLIC ACT NO. 10916.pdf: 13
+DO_123_S2001.pdf: 12
+LTO ADMINISTRATIVE ORDER NO. AHS-2008-015.pdf: 12
+REPUBLIC ACT NO. 10054.pdf: 10
+REPUBLIC ACT No. 10666.pdf: 10
+P.D. No. 96.pdf: 4
+REPUBLIC ACT NO. 8506.pdf: 3
+
+Total unique names: 25
+Total occurrences: 1016
