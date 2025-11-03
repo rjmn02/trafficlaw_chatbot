@@ -109,7 +109,7 @@ async def generate_response(
   completion = groq_client.chat.completions.create(
     model=LLM_MODEL,
     messages=[{"role": "user", "content": augmented_prompt}],
-    max_completion_tokens=512,  # Reduced from 1024 for faster responses
+    max_completion_tokens=1024,
     stream=False,
     temperature=0.3,
     top_p=0.9,
