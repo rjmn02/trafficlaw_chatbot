@@ -5,7 +5,7 @@ const PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:8000';
 
 export async function OPTIONS(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   return new NextResponse(null, {
     status: 200,
@@ -15,10 +15,10 @@ export async function OPTIONS(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const { sessionId } = params;
+    const { sessionId } = await params;
     
     // Forward the request to Python backend
     const response = await fetch(`${PYTHON_API_URL}/sessions/${sessionId}`, {
