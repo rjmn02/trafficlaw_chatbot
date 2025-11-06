@@ -1,0 +1,5 @@
+[00:00:01.116] Server  LOG      ✓ Ready in 921ms
+[00:31:40.978] Server  WARN    Error: Route "/api/sessions/[sessionId]" used `params.sessionId`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:32:34.914] Server  WARN    Error: Route "/api/sessions/[sessionId]" used `params.sessionId`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:34:29.568] Server  WARN    Error: Route "/api/sessions/[sessionId]" used `params.sessionId`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:42:08.996] Server  WARN    Error: Route "/api/sessions/[sessionId]" used `params.sessionId`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis

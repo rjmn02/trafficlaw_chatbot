@@ -1,0 +1,75 @@
+# TrafficLaw Chatbot Architecture
+
+## Monorepo Structure
+
+```
+trafficlaw_chatbot/
+├── frontend/
+│   ├── web/                 # Next.js Frontend (port 3000)
+│   └── api/                 # Next.js API Gateway (port 3001)
+├── backend/                 # Python Backend (port 8000)
+│   ├── main.py
+│   ├── rag_pipeline.py
+│   ├── data_preprocessing.py
+│   ├── models/
+│   ├── schemas/
+│   ├── utils/
+│   └── scripts/
+└── data/
+    └── raw/                 # PDF corpus
+```
+
+## Data Flow
+
+```
+User Query
+    ↓
+Next.js Frontend (port 3000)
+    ↓ HTTP POST /api/chat
+Next.js API Gateway (port 3001)
+    ↓ HTTP POST /chat
+Python Backend (port 8000)
+    ↓ SQL Query
+PostgreSQL + pgvector
+    ↓ Vector Search + LLM
+Response
+    ↓
+Next.js API Gateway
+    ↓
+Next.js Frontend
+    ↓
+User Interface
+```
+
+## Localhost Endpoints (dev)
+
+When running locally with `npm run dev`:
+
+- Frontend (Next.js web): `http://localhost:3000`
+
+- Next.js API Gateway (proxy): `http://localhost:3001`
+  - Health: `http://localhost:3001/api/health`
+  - Chat: `http://localhost:3001/api/chat`  [POST]
+  - Clear Session: `http://localhost:3001/api/sessions/{sessionId}`  [DELETE]
+
+- Python Backend (FastAPI): `http://localhost:8000`
+  - Docs: `http://localhost:8000/docs`
+  - Chat: `http://localhost:8000/chat`  [POST]
+  - Clear Session: `http://localhost:8000/sessions/{session_id}`  [DELETE]
+
+## Services
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| Next.js Frontend | 3000 | React UI, user interface |
+| Next.js API | 3001 | API gateway, request routing |
+| Python Backend | 8000 | RAG pipeline, ML models |
+| PostgreSQL | 5432 | Vector database, embeddings |
+
+## Benefits
+
+1. **Clean Separation**: Frontend, API, and ML services are isolated
+2. **Scalability**: Each service can be scaled independently
+3. **Development**: Use the right tool for each job
+4. **Maintenance**: Easier to debug and modify individual components
+5. **Deployment**: Can deploy services separately if needed
