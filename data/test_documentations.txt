@@ -50,7 +50,8 @@ elibrary.judiciary.gov.ph PDF COPIES
 Krippendorffs Alpha:
 this run: 
 {'faithfulness': 0.8639, 'answer_relevancy': 0.7914}
-0.93001865341449
+0.9300154487176763
+
 {'faithfulness': 0.8791, 'answer_relevancy': 0.7747}
 {'faithfulness': 0.8541, 'answer_relevancy': 0.7467}
 
