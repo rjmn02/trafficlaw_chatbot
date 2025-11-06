@@ -1,6 +1,7 @@
 export type ChatMessage = { 
   role: "user" | "assistant"; 
   content: string;
+  timestamp?: number; // Unix timestamp in milliseconds
 };
 
 export type StoredSession = { 

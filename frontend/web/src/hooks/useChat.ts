@@ -29,23 +29,48 @@ export function useChat(sessionIdRef: React.MutableRefObject<string>) {
   }, [query]);
 
   const typeMessage = (text: string) => {
+    // Clear any existing typing animation
+    if (typingTimerRef.current) {
+      window.clearTimeout(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+    
     let revealed = "";
     setIsTyping(true);
     const step = () => {
+      // Check if timer was cleared (session switched/deleted)
+      if (!typingTimerRef.current && revealed.length > 0) {
+        return; // Animation was cancelled
+      }
+      
       const chunk = text.slice(revealed.length, revealed.length + 6);
       revealed += chunk;
       setMessages(prev => {
+        // Safety check: only update if last message is still an assistant message
         const copy = [...prev];
+        if (copy.length === 0 || copy[copy.length - 1].role !== 'assistant') {
+          return prev; // Don't update if messages changed
+        }
         copy[copy.length - 1] = { role: "assistant", content: revealed };
         return copy;
       });
       if (revealed.length < text.length) {
         typingTimerRef.current = window.setTimeout(step, 12);
       } else { 
-        setIsTyping(false); 
+        setIsTyping(false);
+        typingTimerRef.current = null;
       }
     };
     step();
+  };
+  
+  // Cleanup typing animation when messages are reset externally
+  const stopTyping = () => {
+    if (typingTimerRef.current) {
+      window.clearTimeout(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+    setIsTyping(false);
   };
 
   const onAsk = async (e: React.FormEvent) => {
@@ -74,7 +99,7 @@ export function useChat(sessionIdRef: React.MutableRefObject<string>) {
     }
     
     try {
-      const userMsg: ChatMessage = { role: "user", content: trimmedQuery };
+      const userMsg: ChatMessage = { role: "user", content: trimmedQuery, timestamp: Date.now() };
       setMessages(prev => [...prev, userMsg]);
 
       const res = await fetch(`${API_BASE_URL}/api/chat`, {
@@ -92,7 +117,7 @@ export function useChat(sessionIdRef: React.MutableRefObject<string>) {
       const answerText = data?.answer ?? "";
       
       // Progressive typing: append assistant message gradually
-      const assistantMsg: ChatMessage = { role: "assistant", content: "" };
+      const assistantMsg: ChatMessage = { role: "assistant", content: "", timestamp: Date.now() };
       setMessages(prev => [...prev, assistantMsg]);
       typeMessage(answerText);
       setQuery("");
@@ -136,9 +161,9 @@ export function useChat(sessionIdRef: React.MutableRefObject<string>) {
         const copy = [...prev];
         const idx = copy.length - 1;
         if (copy[idx] && copy[idx].role === 'assistant') {
-          copy[idx] = { role: 'assistant', content: "" };
+          copy[idx] = { role: 'assistant', content: "", timestamp: Date.now() };
         } else {
-          copy.push({ role: 'assistant', content: "" });
+          copy.push({ role: 'assistant', content: "", timestamp: Date.now() });
         }
         return copy;
       });
@@ -172,6 +197,7 @@ export function useChat(sessionIdRef: React.MutableRefObject<string>) {
     composerRef,
     onAsk,
     regenerateLast,
+    stopTyping,
   };
 }
 

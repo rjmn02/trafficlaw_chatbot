@@ -245,7 +245,14 @@ export function Sidebar({
                 ))}
                 {filteredSessions.length === 0 && (
                   <div className="text-sm text-center py-8 px-2" style={{ color: COLORS.accent }}>
-                    {searchQuery ? 'No chats found' : 'No saved chats yet.<br/>Start a conversation!'}
+                    {searchQuery ? (
+                      'No chats found'
+                    ) : (
+                      <>
+                        No saved chats yet.<br />
+                        Start a conversation!
+                      </>
+                    )}
                   </div>
                 )}
               </div>

@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TrafficLaw Chatbot",
-  description: "A RAG assistant for Philippine traffic laws",
+  title: "PH RoadWise",
+  description: "Your AI learning companion for Philippine roads",
 };
 
 export default function RootLayout({

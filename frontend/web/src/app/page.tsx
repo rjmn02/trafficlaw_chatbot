@@ -7,12 +7,20 @@ import { ChatComposer } from "../components/ChatComposer";
 import { EmptyState } from "../components/EmptyState";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { Sidebar } from "../components/Sidebar";
+import { TypingIndicator } from "../components/TypingIndicator";
+import { ScrollToBottom } from "../components/ScrollToBottom";
+import { MessageSkeleton } from "../components/MessageSkeleton";
+import { ToastContainer } from "../components/Toast";
+import { useToast } from "../hooks/useToast";
 import { COLORS } from "../constants";
 
 export default function Home() {
   const sessionIdRef = useRef<string>("");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+  const { toasts, showToast, removeToast } = useToast();
 
   const {
     query,
@@ -28,6 +36,7 @@ export default function Home() {
     composerRef,
     onAsk,
     regenerateLast,
+    stopTyping,
   } = useChat(sessionIdRef);
 
   const {
@@ -57,7 +66,28 @@ export default function Home() {
     };
   }, [composerRef]);
 
+  // Scroll detection for scroll-to-bottom button
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
+      setShowScrollButton(!isNearBottom);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleScrollToBottom = () => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const handleSwitchSession = (id: string) => {
+    // Stop any ongoing typing animation when switching sessions
+    stopTyping();
     const newMessages = switchToSession(id);
     if (newMessages) {
       setMessages(newMessages);
@@ -67,7 +97,11 @@ export default function Home() {
   };
 
   const handleDeleteSession = (id: string) => {
+    // Stop any ongoing typing animation when deleting session
+    stopTyping();
     const newMessages = deleteSession(id);
+    // Always show toast when a chat is deleted
+    showToast('Chat deleted', 'success');
     if (newMessages !== null) {
       setMessages(newMessages);
       setQuery("");
@@ -75,10 +109,27 @@ export default function Home() {
   };
 
   const handleNewChat = async () => {
+    // Stop any ongoing typing animation when starting new chat
+    stopTyping();
     const newMessages = await onNewChat();
     setMessages(newMessages);
     setQuery("");
     setErrorMessage("");
+  };
+
+  const handleExampleClick = (question: string) => {
+    setQuery(question);
+    composerRef.current?.focus();
+  };
+
+  const handleCopyMessage = (content: string) => {
+    navigator.clipboard.writeText(content);
+    showToast('Copied to clipboard!', 'success');
+  };
+
+  const handleRenameSession = (id: string, newTitle: string) => {
+    renameSession(id, newTitle);
+    showToast('Chat renamed', 'success');
   };
 
   const handleRetry = () => {
@@ -109,24 +160,30 @@ export default function Home() {
             onNewChat={handleNewChat}
             onSwitchSession={handleSwitchSession}
             onDeleteSession={handleDeleteSession}
-            onRenameSession={renameSession}
+            onRenameSession={handleRenameSession}
             loading={loading}
           />
 
+
       {/* Main column */}
       <section className="flex-1 flex flex-col h-screen overflow-hidden">
-        <div className="w-full max-w-5xl mx-auto px-6 pt-6 pb-2 flex-shrink-0">
-          <h1 className="text-2xl font-semibold" style={{ color: COLORS.dark }}>TrafficLaw Chatbot</h1>
-        </div>
+            <div className="w-full max-w-5xl mx-auto px-6 pt-6 pb-2 flex-shrink-0">
+              <h1 className="text-2xl font-semibold" style={{ color: COLORS.dark }}>PH RoadWise</h1>
+            </div>
 
         {/* Messages list - scrollable */}
-        <div className="flex-1 w-full max-w-5xl mx-auto px-6 overflow-y-auto space-y-4" aria-live="polite">
+        <div 
+          ref={messagesContainerRef}
+          className="flex-1 w-full max-w-5xl mx-auto px-6 overflow-y-auto space-y-4" 
+          aria-live="polite"
+        >
           {messages.length === 0 ? (
             <div className="h-full flex items-center justify-center">
-              <EmptyState />
+              <EmptyState onExampleClick={handleExampleClick} />
             </div>
           ) : (
             <>
+              {loading && messages.length === 0 && <MessageSkeleton />}
               {messages.map((m, idx) => (
                 <ChatMessage
                   key={idx}
@@ -134,11 +191,10 @@ export default function Home() {
                   isLast={idx === messages.length - 1}
                   onRegenerate={regenerateLast}
                   loading={loading}
+                  onCopy={handleCopyMessage}
                 />
               ))}
-              {isTyping && (
-                <div className="text-xs pl-1" style={{ color: COLORS.accent }}>Assistant is typing…</div>
-              )}
+              {isTyping && <TypingIndicator />}
               <div ref={endRef} />
             </>
           )}
@@ -163,6 +219,12 @@ export default function Home() {
           />
         </div>
       </section>
+
+      {/* Toast Container */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+
+      {/* Scroll to Bottom Button */}
+      <ScrollToBottom onClick={handleScrollToBottom} visible={showScrollButton} />
     </main>
   );
 }
