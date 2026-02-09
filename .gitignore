@@ -9,7 +9,7 @@ __pycache__/
 node_modules/
 
 # Next.js build output
-frontend/api/.next/dev/
+frontend/api/.next/
 frontend/*/.next/
 frontend/*/out/
 frontend/*/tsconfig.tsbuildinfo
