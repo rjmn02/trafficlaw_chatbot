@@ -217,6 +217,10 @@ export default function Home() {
             loading={loading}
             composerRef={composerRef}
           />
+          <p className="text-sm text-gray-500 mt-2 text-center">
+            Note that PH Roadwise may make mistakes. 
+            It can only produce information based on 2025 Philippine traffic laws and regulations.
+          </p>
         </div>
       </section>
 
