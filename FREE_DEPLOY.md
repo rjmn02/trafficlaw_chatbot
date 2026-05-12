@@ -52,7 +52,7 @@
    - **Branch**: `main` or `feature/security-performance-optimizations` (your branch)
    - **Root Directory**: `backend`
    - **Runtime**: Python 3
-   - **Build Command**: `pip install -r requirements.txt`
+   - **Build Command**: `pip install --only-binary :all: -r requirements.txt`
    - **Start Command**: `PYTHONPATH=/opt/render/project/src python -m uvicorn main:app --host 0.0.0.0 --port $PORT`
    - **Instance Type**: Free (sleeps after 15 min)
 
@@ -226,6 +226,14 @@ Now that you have all URLs:
 - Check `PYTHON_API_URL` in API Gateway is correct
 - Verify backend URL is accessible
 - Check root directory settings in Vercel (should be `frontend/api` and `frontend/web`)
+
+### Build Failed: "Read-only file system" (ormsgpack, pydantic_core, etc.)
+- **Cause**: Rust-based packages can't compile on Render's free tier
+- **Fix**: Already handled! Build command uses `--only-binary :all:` to use pre-built wheels
+- **If still failing**: 
+  1. Remove problematic Rust packages from `requirements.txt` if not essential
+  2. Upgrade to Render paid plan ($7+/month) for compilation support
+  3. Use `pip install --only-binary :all: -r requirements.txt` explicitly
 
 ---
 
