@@ -6,10 +6,10 @@ interface EmptyStateProps {
 }
 
 const exampleQuestions = [
-  "What are the penalties for speeding?",
+  "What are the different speed limits on Philippine roads?",
   "How do I renew my driver's license?",
   "What are the requirements for a student permit?",
-  "What is the speed limit on highways?",
+  "Whats the minimum engine displacement for motorcycles to enter expressways?",
 ];
 
 export function EmptyState({ onExampleClick }: EmptyStateProps) {
