@@ -1,7 +1,7 @@
 import { useState, useEffect, type MutableRefObject } from 'react';
 import type { StoredSession, ChatMessage } from '../types';
 import { generateUUID } from '../utils/uuid';
-import { STORAGE_KEYS, sessionDeleteUrl, API_HEADERS } from '../constants';
+import { STORAGE_KEYS, sessionDeleteUrl } from '../constants';
 
 export function useSessions(sessionIdRef: MutableRefObject<string>, messages: ChatMessage[], query: string, setQuery: (q: string) => void) {
   const [sessions, setSessions] = useState<StoredSession[]>([]);
@@ -98,8 +98,7 @@ export function useSessions(sessionIdRef: MutableRefObject<string>, messages: Ch
       // best-effort clear of existing session on the server
       if (sessionIdRef.current) {
         await fetch(sessionDeleteUrl(sessionIdRef.current), {
-          method: 'DELETE',
-          headers: API_HEADERS,                   
+          method: 'DELETE'    
         }).catch(() => {});
       }
       sessionIdRef.current = generateUUID();

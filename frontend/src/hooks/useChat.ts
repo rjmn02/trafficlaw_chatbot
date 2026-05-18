@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type FormEvent, type MutableRefObject } from 'react';
 import type { ChatMessage } from '../types';
 import { generateUUID } from '../utils/uuid';
-import { CHAT_ENDPOINT, API_HEADERS } from '../constants';
+import { CHAT_ENDPOINT } from '../constants';
 
 export function useChat(sessionIdRef: MutableRefObject<string>) {
   const [query, setQuery] = useState("");
@@ -101,11 +101,10 @@ export function useChat(sessionIdRef: MutableRefObject<string>) {
     try {
       const userMsg: ChatMessage = { role: "user", content: trimmedQuery, timestamp: Date.now() };
       setMessages(prev => [...prev, userMsg]);
-      console.log(API_HEADERS);
 
       const res = await fetch(CHAT_ENDPOINT, {
         method: "POST",
-        headers: API_HEADERS,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: sessionIdRef.current, query: trimmedQuery }),
       });
       
@@ -145,7 +144,7 @@ export function useChat(sessionIdRef: MutableRefObject<string>) {
     try {
       const res = await fetch(CHAT_ENDPOINT, {
         method: "POST",
-        headers: API_HEADERS,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: sessionIdRef.current || generateUUID(), query: lastUser.content }),
       });
       

@@ -37,8 +37,3 @@ export const CHAT_ENDPOINT = apiUrl('/chat');
 export function sessionDeleteUrl(sessionId: string): string {
   return apiUrl(`/sessions/${sessionId}`);
 }
-
-export const API_HEADERS = {
-  "Content-Type": "application/json",
-  "X-API-Key": import.meta.env.VITE_APP_API_KEY as string,
-} as const;
