@@ -33,9 +33,6 @@ GROQ_PROD_KEY="your_groq_prod_key"
 DATA_RAW_PATH="D:/Projects/trafficlaw_chatbot/data/raw"
 DATA_PROCESSED_PATH="D:/Projects/trafficlaw_chatbot/data/processed"
 EVAL_TESTSET_PATH="D:/Projects/trafficlaw_chatbot/data/evaluation_testset.csv"
-
-# INTERNAL CONFIG
-APP_API_KEY="your_secret_app_api_key"
 ```
 
 ### Frontend Environment Variables (`frontend/.env`)
@@ -46,9 +43,6 @@ Create a `.env` file inside the `frontend/` directory with the following structu
 # Leave unset for local development (Vite proxies /api/* to http://127.0.0.1:8000)
 # Set to your production backend URL for deployments (e.g., https://your-service.onrender.com)
 # VITE_API_URL=
-
-# APP API KEY (Must match the one in backend/.env)
-VITE_APP_API_KEY="your_secret_app_api_key"
 ```
 
 ---
