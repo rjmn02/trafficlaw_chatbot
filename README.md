@@ -103,3 +103,6 @@ The frontend is built with React and Vite. To run it locally, follow these steps
    npm run dev
    ```
    The frontend will now be accessible via your browser (typically at `http://localhost:5173`).
+  
+  ## RAG System Architecture
+  ![alt text](image-1.png)
