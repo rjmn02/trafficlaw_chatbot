@@ -1,24 +1,18 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from typing import List
 from models.document import Document
-from sentence_transformers import SentenceTransformer
 import pymupdf
 import os
 import re
-from transformers import AutoTokenizer
 from dotenv import load_dotenv
+from utils.models import embedding_model, tokenizer
 
 load_dotenv()
 
 FILE_PATH = os.getenv("DATA_RAW_PATH", "")
-EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 CHUNK_SIZE = 200
 OVERLAP = 40
 EMBED_BATCH_SIZE = 64
-EMBED_DEVICE = "cpu"  # "cpu" or "cuda"
-
-_tokenizer = AutoTokenizer.from_pretrained(EMBEDDING_MODEL)
-_embedder = SentenceTransformer(EMBEDDING_MODEL, device=EMBED_DEVICE)
 
 
 # loading documents from the file path
@@ -52,7 +46,7 @@ def clean_document_contents(documents: List[Document]) -> List[Document]:
 # chunking and tokenizing
 def chunk_documents(documents: List[Document]):
   text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
-    tokenizer=_tokenizer, chunk_size=CHUNK_SIZE, chunk_overlap=OVERLAP
+    tokenizer=tokenizer, chunk_size=CHUNK_SIZE, chunk_overlap=OVERLAP
   )
 
   chunked_docs: List[Document] = []
@@ -65,11 +59,11 @@ def chunk_documents(documents: List[Document]):
 
 
 # embed and store documents
-async def embed_documents(documents: List[Document]) -> List[Document]:
+def embed_documents(documents: List[Document]) -> List[Document]:
   if not documents:
     return documents
   texts = [d.content for d in documents]
-  embeddings = _embedder.encode(
+  embeddings = embedding_model.encode(
     texts,
     batch_size=EMBED_BATCH_SIZE,
     show_progress_bar=True,

@@ -7,12 +7,6 @@ __pycache__/
 .DS_Store
 node_modules/
 
-# Next.js build output
-frontend/api/.next/
-frontend/web/.next/
-frontend/*/out/
-frontend/*/tsconfig.tsbuildinfo
-
 # Local env files
 .env.local
 .env.development.local

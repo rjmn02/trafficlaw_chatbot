@@ -1,10 +1,9 @@
-import asyncio
 from langchain_groq import ChatGroq
 from ragas import evaluate, EvaluationDataset
 from ragas.metrics import Faithfulness, ResponseRelevancy
 from rag_pipeline import generate_response
 from schemas.query import QueryRequest, QueryResponse
-from utils.database import async_session
+from utils.database import SessionLocal
 from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
 import pandas as pd
@@ -18,19 +17,19 @@ load_dotenv()
 TESTSET_FILEPATH = os.getenv("EVAL_TESTSET_PATH", " ")
 
 
-async def main():
+def main():
   df = pd.read_csv(TESTSET_FILEPATH)
   user_input = df["user_query"].tolist()
   expected_responses = df["expected_responses"].tolist()
   dataset = []
 
   # Inference
-  async with async_session() as db:
+  with SessionLocal() as db:
     for query, reference in zip(user_input, expected_responses):
       session_id = str(uuid.uuid4())
       request = QueryRequest(query=query, session_id=session_id)
       # Note: evaluation doesn't use conversation memory (each query is independent)
-      response: QueryResponse = await generate_response(request, db, memory=None)
+      response: QueryResponse = generate_response(request, db, memory=None)
       # Note: Uncomment for debugging output
       # print(response.answer)
 
@@ -77,4 +76,4 @@ async def main():
 
 
 if __name__ == "__main__":
-  asyncio.run(main())
+  main()

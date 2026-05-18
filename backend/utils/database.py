@@ -1,29 +1,22 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
 from typing import Annotated
 from fastapi import Depends
 
 load_dotenv()
 
-# Database URL
-DATABASE_URL = os.getenv("DATABASE_URL")
-# Disable echo in production for better performance (set to False or use env var)
-engine = create_async_engine(
-    DATABASE_URL, 
-    echo=os.getenv("DB_ECHO", "false").lower() == "true",  # Only log SQL in debug mode
-    pool_pre_ping=True,  # Verify connections before using
-    pool_size=5,  # Connection pool size
-    max_overflow=10  # Additional connections beyond pool_size
-)
-# Create session factory ONCE
-async_session = async_sessionmaker(engine, expire_on_commit=False)
+DATABASE_URL = os.getenv("SUPABASE_DB_URL")
 
-# Then, in your dependency
-async def get_session():
-  async with async_session() as session:
-     yield session
+if not DATABASE_URL:
+    raise RuntimeError("SUPABASE_DB_URL is not set")
 
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
-AsyncSessionDep = Annotated[AsyncSession, Depends(get_session)]
+def get_session():
+    with SessionLocal() as session:
+        yield session
+
+SessionDep = Annotated[Session, Depends(get_session)]
