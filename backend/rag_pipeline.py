@@ -6,22 +6,19 @@ from models.document import Document
 from schemas.document import DocumentInDB
 from typing import List, Optional
 from schemas.query import QueryRequest, QueryResponse
-from utils.models import embedding_model, groq_client
+from utils.constants import EMBEDDING_MODEL, hf_client, groq_client, LLM_MODEL, DEFAULT_TOP_K
 
 logger = logging.getLogger(__name__)
-
-
-LLM_MODEL = "llama-3.1-8b-instant"
-DEFAULT_TOP_K = 20
-
 
 def similarity_search(
     query: str,
     db: SessionDep,
     top_k: Optional[int] = DEFAULT_TOP_K,
 ) -> List[DocumentInDB]:
-    query_embedding = embedding_model.encode(
-        query, normalize_embeddings=True, show_progress_bar=False
+    query_embedding = hf_client.feature_extraction(
+        model=EMBEDDING_MODEL,
+        text=query,
+        normalize=True
     ).tolist()
 
     try:

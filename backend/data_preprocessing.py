@@ -5,15 +5,11 @@ import pymupdf
 import os
 import re
 from dotenv import load_dotenv
-from utils.models import embedding_model, tokenizer
+from utils.constants import EMBEDDING_MODEL, hf_client, CHUNK_SIZE, OVERLAP
 
 load_dotenv()
 
 FILE_PATH = os.getenv("DATA_RAW_PATH", "")
-CHUNK_SIZE = 200
-OVERLAP = 40
-EMBED_BATCH_SIZE = 64
-
 
 # loading documents from the file path
 def load_documents() -> List[Document]:
@@ -45,8 +41,8 @@ def clean_document_contents(documents: List[Document]) -> List[Document]:
 
 # chunking and tokenizing
 def chunk_documents(documents: List[Document]):
-  text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
-    tokenizer=tokenizer, chunk_size=CHUNK_SIZE, chunk_overlap=OVERLAP
+  text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=CHUNK_SIZE, chunk_overlap=OVERLAP
   )
 
   chunked_docs: List[Document] = []
@@ -63,15 +59,14 @@ def embed_documents(documents: List[Document]) -> List[Document]:
   if not documents:
     return documents
   texts = [d.content for d in documents]
-  embeddings = embedding_model.encode(
-    texts,
-    batch_size=EMBED_BATCH_SIZE,
-    show_progress_bar=True,
-    normalize_embeddings=True,  # good for cosine / <-> distance
+  embeddings = hf_client.feature_extraction(
+    model=EMBEDDING_MODEL,
+    text=texts,
+    normalize=True  # good for cosine / <-> distance
   )
   for doc, emb in zip(documents, embeddings):
     doc.embedding = emb.tolist()
 
   # Log embedding completion (using print for script output is acceptable)
-  print(f"Embeddings generated for {len(documents)} chunks (batch size={EMBED_BATCH_SIZE}).")
+  print(f"Embeddings generated for {len(documents)}")
   return documents
