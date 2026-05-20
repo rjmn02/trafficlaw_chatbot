@@ -24,7 +24,7 @@ An AI-powered RAG (Retrieval-Augmented Generation) chatbot designed to answer qu
 
 - **Node.js**: v16+
 - **Python**: 3.9+
-- **Docker**: For running the local PostgreSQL database
+- **Supabase Account**: For the hosted PostgreSQL database, OR **Docker** if running locally.
 
 ### 2. Environment Setup
 
@@ -40,7 +40,6 @@ dbname=trafficlawdb
 SUPABASE_DB_URL=postgresql+psycopg2://$user:$password@$host:$port/$dbname
 
 GROQ_API_KEY="your_groq_api_key"
-GROQ_PROD_KEY="your_groq_prod_key"
 
 DATA_RAW_PATH="../data/raw"
 DATA_PROCESSED_PATH="../data/processed"
@@ -57,7 +56,14 @@ EVAL_TESTSET_PATH="../data/evaluation_testset.csv"
 ### 3. Local Development
 
 #### Start the Database
-Spin up the \pgvector\ Postgres database via Docker:
+
+**Primary Option: Supabase**
+This project primarily uses [Supabase](https://supabase.com/) for its PostgreSQL database.
+1. Create a project on Supabase and enable the `pgvector` extension.
+2. Copy your connection string into the `SUPABASE_DB_URL` variable in your `backend/.env` file.
+
+**Alternative Option: Local Docker**
+If you prefer running the database locally, spin up the `pgvector` Postgres container:
  ```bash
 docker-compose up -d
  ```
