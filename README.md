@@ -1,6 +1,7 @@
-﻿# Traffic Law Chatbot
+# Traffic Law Chatbot
 
 An AI-powered RAG (Retrieval-Augmented Generation) chatbot designed to answer questions related to traffic laws. It uses a modern React frontend and a FastAPI backend connected to a PostgreSQL database with pgvector for semantic search.
+![alt text](image.png)
 
 ## 🌟 Features
 
@@ -29,8 +30,8 @@ An AI-powered RAG (Retrieval-Augmented Generation) chatbot designed to answer qu
 
 Copy the example environment file or create new ones for backend and frontend:
 
-#### Backend (\ackend/.env\)
-\\\env
+#### Backend (\backend/.env\)
+```env
 user=root
 password=rootpass
 host=localhost
@@ -44,51 +45,67 @@ GROQ_PROD_KEY="your_groq_prod_key"
 DATA_RAW_PATH="../data/raw"
 DATA_PROCESSED_PATH="../data/processed"
 EVAL_TESTSET_PATH="../data/evaluation_testset.csv"
-\\\
+```
 
-#### Frontend (\rontend/.env\)
-\\\env
+#### Frontend (\frontend/.env\)
+```env
 # URL for the backend API.
 # Leave unset for local development (Vite proxies /api/* to http://127.0.0.1:8000)
 # VITE_API_URL=/_/backend
-\\\
+```
 
 ### 3. Local Development
 
 #### Start the Database
 Spin up the \pgvector\ Postgres database via Docker:
-\\\ash
+ ```bash
 docker-compose up -d
-\\\
+ ```
 
 #### Start the Backend (FastAPI)
-\\\ash
+ ```bash
 cd backend
 python -m venv venv
 .\venv\Scripts\activate   # Windows
 # source venv/bin/activate # macOS/Linux
 pip install -r requirements.txt
 uvicorn main:app --reload
-\\\
+```
 
 #### Start the Frontend (Vite)
-\\\ash
+ ```bash
 cd frontend
 npm install
 npm run dev
-\\\
+```
 The application will be available at \http://localhost:5173\.
 
 ---
 
 ## ☁️ Deployment (Vercel)
 
-This project is configured as a monorepo for Vercel deployment via \ercel.json\.
+This project is configured as a monorepo for Vercel deployment via \vercel.json\.
 
 1. Import the repository into Vercel.
 2. In the Vercel project settings, set the **Framework Preset** to \Vite\.
 3. Add the required Environment Variables in Vercel settings (e.g., \GROQ_API_KEY\, \SUPABASE_DB_URL\, \VITE_API_URL=/_/backend\).
 4. Deploy! Requests to \/_/backend\ will be routed securely to your FastAPI service.
 
-## 🧠 RAG System Architecture
-![Architecture](image-1.png)
+## 🧠 System Architecture
+
+The project consists of three main components working together to provide an AI-powered conversational experience:
+
+1. **Frontend (Vite + React)**: 
+   - A single-page application that provides a chat interface to the user.
+   - It proxies API calls to the backend during local development, and routes them appropriately in production via Vercel.
+
+2. **Backend (Python + FastAPI)**:
+   - Exposes REST API endpoints (`/chat`, `/sessions`).
+   - Implements the RAG (Retrieval-Augmented Generation) pipeline: it takes user queries, builds an embedding, retrieves similar documents from the database, and queries the Groq LLM API.
+
+3. **Database (PostgreSQL + pgvector)**:
+   - Stores pre-processed traffic law document embeddings.
+   - Uses `pgvector` extension for fast semantic similarity search.
+
+**Core Workflow**:
+User Input → Frontend Chat UI → FastAPI `/chat` endpoint → pgvector retrieval → LLM Generation (Groq) → Response parsed & sent back to User.
