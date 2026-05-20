@@ -30,7 +30,7 @@ An AI-powered RAG (Retrieval-Augmented Generation) chatbot designed to answer qu
 
 Copy the example environment file or create new ones for backend and frontend:
 
-#### Backend (\backend/.env\)
+#### Backend (`backend/.env`)
 ```env
 user=root
 password=rootpass
@@ -40,13 +40,15 @@ dbname=trafficlawdb
 SUPABASE_DB_URL=postgresql+psycopg2://$user:$password@$host:$port/$dbname
 
 GROQ_API_KEY="your_groq_api_key"
+HF_TOKEN="your_huggingface_token"
+ALLOWED_ORIGINS="" # Leave empty for local, set to Vercel URL in production
 
 DATA_RAW_PATH="../data/raw"
 DATA_PROCESSED_PATH="../data/processed"
 EVAL_TESTSET_PATH="../data/evaluation_testset.csv"
 ```
 
-#### Frontend (\frontend/.env\)
+#### Frontend (`frontend/.env`)
 ```env
 # URL for the backend API.
 # Leave unset for local development (Vite proxies /api/* to http://127.0.0.1:8000)
@@ -84,18 +86,19 @@ cd frontend
 npm install
 npm run dev
 ```
-The application will be available at \http://localhost:5173\.
+The application will be available at `http://localhost:5173`.
+
 
 ---
 
 ## ☁️ Deployment (Vercel)
 
-This project is configured as a monorepo for Vercel deployment via \vercel.json\.
+This project is configured as a monorepo for Vercel deployment via `vercel.json`.
 
 1. Import the repository into Vercel.
-2. In the Vercel project settings, set the **Framework Preset** to \Vite\.
-3. Add the required Environment Variables in Vercel settings (e.g., \GROQ_API_KEY\, \SUPABASE_DB_URL\, \VITE_API_URL=/_/backend\).
-4. Deploy! Requests to \/_/backend\ will be routed securely to your FastAPI service.
+2. In the Vercel project settings, set the **Framework Preset** to `Vite`.
+3. Add the required Environment Variables in Vercel settings (e.g., `GROQ_API_KEY`, `HF_TOKEN`, `SUPABASE_DB_URL`, `VITE_API_URL=/_/backend`, and `ALLOWED_ORIGINS="https://your-vercel-app-url.vercel.app"`).
+4. Deploy! Requests to `/_/backend` will be routed securely to your FastAPI service.
 
 ## 🧠 System Architecture
 
