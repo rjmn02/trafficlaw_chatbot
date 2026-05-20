@@ -1,102 +1,94 @@
-# Traffic Law Chatbot - Setup Guide
+﻿# Traffic Law Chatbot
 
-This guide provides instructions on how to set up the environment variables and run both the FastAPI backend and the Vite+React frontend.
+An AI-powered RAG (Retrieval-Augmented Generation) chatbot designed to answer questions related to traffic laws. It uses a modern React frontend and a FastAPI backend connected to a PostgreSQL database with pgvector for semantic search.
 
-## Prerequisites
-- **Node.js** (v16 or higher)
-- **Python** (3.9 or higher)
+## 🌟 Features
+
+- **Conversational Interface**: Modern chat UI with typing indicators, markdown support, and session management.
+- **RAG Architecture**: Accurately fetches relevant traffic laws and regulations to ground the LLM's responses using pgvector.
+- **Session Memory**: Remembers past conversations and maintains chat history for context.
+- **Vercel Ready**: Easily deploy both frontend and backend on Vercel as a monorepo.
+
+## 🏗 Tech Stack
+
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS (via components)
+- **Backend**: Python, FastAPI, Groq API (LLM)
+- **Database**: PostgreSQL with pgvector (via Docker/Supabase)
 
 ---
 
-## 1. Environment Variables Setup
+## 🚀 Getting Started
 
-You will need to create `.env` files for both the backend and frontend. 
+### 1. Prerequisites
 
-### Backend Environment Variables (`backend/.env`)
-Create a `.env` file inside the `backend/` directory. You can use the provided `example.env` as a template or use the following structure:
+- **Node.js**: v16+
+- **Python**: 3.9+
+- **Docker**: For running the local PostgreSQL database
 
-```env
-# Database configuration
-user=your_db_user
-password=your_db_password
-host=your_db_host
+### 2. Environment Setup
+
+Copy the example environment file or create new ones for backend and frontend:
+
+#### Backend (\ackend/.env\)
+\\\env
+user=root
+password=rootpass
+host=localhost
 port=5432
-dbname=postgres
+dbname=trafficlawdb
+SUPABASE_DB_URL=postgresql+psycopg2://$user:$password@$host:$port/$dbname
 
-SUPABASE_DB_URL=postgresql+psycopg2://${user}:${password}@${host}:${port}/${dbname}?sslmode=require
-
-# External APIs
 GROQ_API_KEY="your_groq_api_key"
 GROQ_PROD_KEY="your_groq_prod_key"
 
-# Data paths (adjust to your system)
-DATA_RAW_PATH="D:/Projects/trafficlaw_chatbot/data/raw"
-DATA_PROCESSED_PATH="D:/Projects/trafficlaw_chatbot/data/processed"
-EVAL_TESTSET_PATH="D:/Projects/trafficlaw_chatbot/data/evaluation_testset.csv"
-```
+DATA_RAW_PATH="../data/raw"
+DATA_PROCESSED_PATH="../data/processed"
+EVAL_TESTSET_PATH="../data/evaluation_testset.csv"
+\\\
 
-### Frontend Environment Variables (`frontend/.env`)
-Create a `.env` file inside the `frontend/` directory with the following structure:
-
-```env
+#### Frontend (\rontend/.env\)
+\\\env
 # URL for the backend API.
 # Leave unset for local development (Vite proxies /api/* to http://127.0.0.1:8000)
-# Set to your production backend URL for deployments (e.g., https://your-service.onrender.com)
-# VITE_API_URL=
-```
+# VITE_API_URL=/_/backend
+\\\
+
+### 3. Local Development
+
+#### Start the Database
+Spin up the \pgvector\ Postgres database via Docker:
+\\\ash
+docker-compose up -d
+\\\
+
+#### Start the Backend (FastAPI)
+\\\ash
+cd backend
+python -m venv venv
+.\venv\Scripts\activate   # Windows
+# source venv/bin/activate # macOS/Linux
+pip install -r requirements.txt
+uvicorn main:app --reload
+\\\
+
+#### Start the Frontend (Vite)
+\\\ash
+cd frontend
+npm install
+npm run dev
+\\\
+The application will be available at \http://localhost:5173\.
 
 ---
 
-## 2. Running the Backend (FastAPI)
+## ☁️ Deployment (Vercel)
 
-The backend is built with FastAPI. To run it locally, follow these steps:
+This project is configured as a monorepo for Vercel deployment via \ercel.json\.
 
-1. Open a terminal and navigate to the `backend` directory:
-   ```bash
-   cd backend
-   ```
+1. Import the repository into Vercel.
+2. In the Vercel project settings, set the **Framework Preset** to \Vite\.
+3. Add the required Environment Variables in Vercel settings (e.g., \GROQ_API_KEY\, \SUPABASE_DB_URL\, \VITE_API_URL=/_/backend\).
+4. Deploy! Requests to \/_/backend\ will be routed securely to your FastAPI service.
 
-2. (Optional but recommended) Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   # On Windows:
-   .\venv\Scripts\activate
-   # On macOS/Linux:
-   source venv/bin/activate
-   ```
-
-3. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Start the FastAPI development server:
-   ```bash
-   uvicorn main:app --reload
-   ```
-   The backend will now be running at `http://127.0.0.1:8000`.
-
----
-
-## 3. Running the Frontend (Vite + React)
-
-The frontend is built with React and Vite. To run it locally, follow these steps:
-
-1. Open a new terminal and navigate to the `frontend` directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install the dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
-   The frontend will now be accessible via your browser (typically at `http://localhost:5173`).
-  
-  ## RAG System Architecture
-  ![alt text](image-1.png)
+## 🧠 RAG System Architecture
+![Architecture](image-1.png)
