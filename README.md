@@ -1,7 +1,7 @@
 # Traffic Law Chatbot
 
 An AI-powered RAG (Retrieval-Augmented Generation) chatbot designed to answer questions related to traffic laws. It uses a modern React frontend and a FastAPI backend connected to a PostgreSQL database with pgvector for semantic search.
-![alt text](image.png)
+![alt text](<Screenshot 2026-05-18 180933.png>)
 
 ## 🌟 Features
 
