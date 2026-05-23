@@ -3,6 +3,18 @@
 An AI-powered RAG (Retrieval-Augmented Generation) chatbot designed to answer questions related to traffic laws. It uses a modern React frontend and a FastAPI backend connected to a PostgreSQL database with pgvector for semantic search.
 ![alt text](<Screenshot 2026-05-18 180933.png>)
 
+# Upgrading a RAG Pipeline: From Thesis Prototype to Production
+
+## Executive Summary
+This project originally started as an academic thesis utilizing Llama 8B. After defending the thesis, I implemented the technical recommendations outlined in my future work section: migrating to a 70B parameter model and optimizing text chunking parameters to drastically mitigate hallucinations.
+
+## System Evolution (v1.0 vs v2.0)
+
+| Feature | v1.0 (Thesis Baseline) | v2.0 (Production Upgrade) |
+| :--- | :--- | :--- |
+| **LLM** | Llama 8B | Llama 70B (API) |
+| **Chunking Strategy**|  200 tokens with 40 token overlap | 1000 tokens with 200 token overlap
+
 ## 🌟 Features
 
 - **Conversational Interface**: Modern chat UI with typing indicators, markdown support, and session management.

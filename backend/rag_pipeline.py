@@ -6,48 +6,51 @@ from models.document import Document
 from schemas.document import DocumentInDB
 from typing import List, Optional
 from schemas.query import QueryRequest, QueryResponse
-from utils.constants import EMBEDDING_MODEL, hf_client, groq_client, LLM_MODEL, DEFAULT_TOP_K
+from utils.constants import (
+  EMBEDDING_MODEL,
+  hf_client,
+  groq_client,
+  LLM_MODEL,
+  DEFAULT_TOP_K,
+)
 
 logger = logging.getLogger(__name__)
 
+
 def similarity_search(
-    query: str,
-    db: SessionDep,
-    top_k: Optional[int] = DEFAULT_TOP_K,
+  query: str,
+  db: SessionDep,
+  top_k: Optional[int] = DEFAULT_TOP_K,
 ) -> List[DocumentInDB]:
-    query_embedding = hf_client.feature_extraction(
-        model=EMBEDDING_MODEL,
-        text=query,
-        normalize=True
-    ).tolist()
+  query_embedding = hf_client.feature_extraction(model=EMBEDDING_MODEL, text=query, normalize=True).tolist()
 
-    try:
-        stmt = select(Document).order_by(Document.embedding.op("<=>")(query_embedding)).limit(top_k)
-        result = db.execute(stmt)          # no await
-        return result.scalars().all()
+  try:
+    stmt = select(Document).order_by(Document.embedding.op("<=>")(query_embedding)).limit(top_k)
+    result = db.execute(stmt)  # no await
+    return result.scalars().all()
 
-    except Exception as e:
-        logger.error(f"Error during similarity search: {e}")
-        return []
+  except Exception as e:
+    logger.error(f"Error during similarity search: {e}")
+    return []
 
 
 def build_prompt(query: str, documents: List[DocumentInDB], history: List[dict]) -> str:
-    if documents:
-        numbered_contexts = []
-        for doc in documents:
-            doc_name = doc.file_source if doc.file_source else "Unknown Document"
-            numbered_contexts.append(f"[Document {doc_name}: ]\n{doc.content}")
-        context_text = "\n\n".join(numbered_contexts)
-    else:
-        context_text = "No relevant documents found."
+  if documents:
+    numbered_contexts = []
+    for doc in documents:
+      doc_name = doc.file_source if doc.file_source else "Unknown Document"
+      numbered_contexts.append(f"[Document {doc_name}: ]\n{doc.content}")
+    context_text = "\n\n".join(numbered_contexts)
+  else:
+    context_text = "No relevant documents found."
 
-    conversation = ""
-    if history:
-        recent_history = history[-6:] if len(history) > 6 else history
-        history_lines = [f"{msg['role'].upper()}: {msg['content']}" for msg in recent_history]
-        conversation = "\nPrevious conversation:\n" + "\n".join(history_lines) + "\n"
+  conversation = ""
+  if history:
+    recent_history = history[-6:] if len(history) > 6 else history
+    history_lines = [f"{msg['role'].upper()}: {msg['content']}" for msg in recent_history]
+    conversation = "\nPrevious conversation:\n" + "\n".join(history_lines) + "\n"
 
-    return f"""You are a helpful and friendly expert assistant on Philippine traffic laws and vehicle regulations.
+  return f"""You are a helpful and friendly expert assistant on Philippine traffic laws and vehicle regulations.
 
 {conversation if conversation else ""}
 
@@ -68,25 +71,26 @@ QUESTION: {query}
 ANSWER:"""
 
 
-def generate_response(
-    query_request: QueryRequest, db: SessionDep, memory: ConversationMemory = None
-) -> QueryResponse:
-    query = query_request.query
-    retrieved_docs = similarity_search(query, db)      # no await
+def generate_response(query_request: QueryRequest, db: SessionDep, memory: ConversationMemory = None) -> QueryResponse:
+  query = query_request.query
+  # Step 1: Similarity search to retrieve relevant documents
+  retrieved_docs = similarity_search(query, db)  # no await
+  
+  # Step 2: Build the prompt with the top reranked documents and conversation history
+  history = memory.get_history() if memory else []
+  augmented_prompt = build_prompt(query, retrieved_docs, history)
 
-    history = memory.get_history() if memory else []
-    augmented_prompt = build_prompt(query, retrieved_docs, history)
+  # Step 3: Generate response using the LLM
+  completion = groq_client.chat.completions.create(
+    model=LLM_MODEL,
+    messages=[{"role": "user", "content": augmented_prompt}],
+    max_completion_tokens=512,
+    stream=False,
+    temperature=0.3,
+    top_p=0.9,
+    timeout=30.0,
+  )
+  llm_answer = completion.choices[0].message.content
 
-    completion = groq_client.chat.completions.create(
-        model=LLM_MODEL,
-        messages=[{"role": "user", "content": augmented_prompt}],
-        max_completion_tokens=512,
-        stream=False,
-        temperature=0.3,
-        top_p=0.9,
-        timeout=30.0,
-    )
-    llm_answer = completion.choices[0].message.content
-
-    contexts = [doc.content for doc in retrieved_docs]
-    return QueryResponse(answer=llm_answer, retrieved_docs=contexts)
+  contexts = [doc.content for doc in retrieved_docs]
+  return QueryResponse(answer=llm_answer, retrieved_docs=contexts)

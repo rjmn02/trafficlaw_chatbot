@@ -8,13 +8,12 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 # Response generation constants
-LLM_MODEL = "llama-3.1-8b-instant"
-DEFAULT_TOP_K = 20
+LLM_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_TOP_K = 15
 
 # Preprocessing constants
-CHUNK_SIZE = 200
-OVERLAP = 40
-EMBED_BATCH_SIZE = 64
+CHUNK_SIZE = 1000
+OVERLAP = 200
 
 if not GROQ_API_KEY:
     raise RuntimeError("GROQ_API_KEY is not set")

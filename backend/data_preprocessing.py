@@ -32,8 +32,12 @@ def clean_document_contents(documents: List[Document]) -> List[Document]:
   cleaned: List[Document] = []
   for d in documents:
     text = d.content
+    # Fix hyphenated words at the end of lines
+    text = re.sub(r"-\n\s*", "", text)
+    # Remove control characters but preserve valid Unicode (like Umlaute and §)
+    text = re.sub(r'[\x00-\x08\x0B-\x1F\x7F-\x9F]', '', text)
+    # Normalize whitespaces
     text = re.sub(r"\s+", " ", text)
-    text = re.sub(r"[^\x20-\x7E\n]", "", text)
     text = text.strip()
     cleaned.append(Document(content=text, embedding=[], file_source=d.file_source))
   return cleaned
